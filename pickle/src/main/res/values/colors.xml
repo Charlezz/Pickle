@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="TC01">#000000</color>
+    <color name="TC02">#FFFFFF</color>
+    <color name="WT">#FFFFFF</color>
+    <color name="BK_20">#33000000</color>
+    <color name="BK_30">#4D000000</color>
+    <color name="BK_50">#88000000</color>
+
+    <color name="background">@color/GR50</color>
+    <color name="error">#B00020</color>
+
+
+    <color name="GR50">#E8F5E9</color>
+    <color name="GR100">#C8E6C9</color>
+    <color name="GR200">#A5D6A7</color>
+    <color name="GR300">#81C784</color>
+    <color name="GR400">#66BB6A</color>
+    <color name="GR500">#4CAF50</color>
+    <color name="GR600">#43A047</color>
+    <color name="GR700">#388E3C</color>
+    <color name="GR800">#2E7D32</color>
+    <color name="GR900">#1B5E20</color>
+    <color name="GR100A">#B9F6CA</color>
+    <color name="GR200A">#69F0AE</color>
+    <color name="GR400A">#00E676</color>
+    <color name="GR700A">#00C853</color>
+
+    <color name="light_white">#80ffffff</color>
+
+</resources>
