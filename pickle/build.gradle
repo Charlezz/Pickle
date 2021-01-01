@@ -3,7 +3,35 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-parcelize'
 apply plugin: "androidx.navigation.safeargs.kotlin"
+
+apply from: "$project.rootDir/tools/script-git-version.gradle"
+
+ext {
+    bintrayRepo = 'Pickle' // Repo name in bintray dashboard
+    bintrayName = 'com.charlezz.pickle' // package name of the bintray repo
+
+    publishedGroupId = 'com.charlezz'   // this is the ID we want to see in implementation line
+    libraryName = 'Charlezz'     // this is the module name of library
+    artifact = 'pickle'        // this is the artifact we want to see in implementation line
+
+    libraryDescription = 'The fastest Android image picker library' // description of library
+
+    siteUrl = 'https://github.com/Charlezz/Pickle'    // git repo url
+    gitUrl = 'https://github.com/Charlezz/Pickle.git' // git repo vcs url
+
+    libraryVersion = "1.0.0-alpha"      // library version, use $appVersionName instead
+
+    developerId = 'charlezz'                // This is your bintray username
+    developerName = 'Charlezz'              // Developer's name
+    developerEmail = 'charlezz@charlezz.com'                // Developer's email
+
+    licenseName = 'The Apache Software License, Version 2.0'  // for example, The Apache Software License, Version 2.0
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'   // for example, http://www.apache.org/licenses/LICENSE-2.0.txt
+    allLicenses = ["Apache-2.0"]    // array of licenses, for example, ["Apache-2.0"]
+}
+
 android {
+
     compileSdkVersion project.compileSdk
     buildToolsVersion project.buildTools
 
@@ -11,8 +39,6 @@ android {
 
     defaultConfig {
         minSdkVersion project.minSdk
-//        versionCode 1
-//        versionName "1.0-alpha01"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
         multiDexEnabled true
@@ -59,11 +85,6 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
 
-    //rxjava
-    implementation "io.reactivex.rxjava2:rxjava:2.2.19"
-    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
-    implementation 'io.reactivex.rxjava2:rxkotlin:2.4.0'
-
     //Glide
     implementation "com.github.bumptech.glide:glide:4.11.0"
     kapt 'com.github.bumptech.glide:compiler:4.11.0'
@@ -74,9 +95,6 @@ dependencies {
     //Design Support
     implementation 'com.google.android.material:material:1.2.1'
 
-    //ViewPager2
-    implementation 'androidx.viewpager2:viewpager2:1.0.0'
-1
     //navigation
     implementation "androidx.navigation:navigation-fragment-ktx:$navigation_version"
     implementation "androidx.navigation:navigation-ui-ktx:$navigation_version"
@@ -95,6 +113,9 @@ dependencies {
     //timber
     implementation 'com.jakewharton.timber:timber:4.7.1'
 
+    //PhotoView
+    implementation 'com.github.chrisbanes:PhotoView:2.0.0'
+
     // Android Testing Support Library's runner and rules
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
@@ -109,3 +130,11 @@ dependencies {
     debugImplementation 'androidx.fragment:fragment-testing:1.2.5'
 
 }
+
+// Avoid Kotlin docs error
+//https://github.com/novoda/bintray-release/issues/71
+tasks.withType(Javadoc).all {
+    enabled = false
+}
+
+apply from: 'publish.gradle'

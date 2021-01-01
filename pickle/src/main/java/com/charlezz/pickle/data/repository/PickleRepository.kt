@@ -5,6 +5,7 @@ import com.charlezz.pickle.data.entity.Media
 import kotlinx.coroutines.flow.Flow
 
 interface PickleRepository {
+
     fun getItems(
         selectionType:PicklePagingSource.SelectionType,
         bucketId: Int?,
@@ -14,5 +15,5 @@ interface PickleRepository {
 
     fun invalidate()
 
-    fun close()
+    fun getCount():Flow<Int?>
 }

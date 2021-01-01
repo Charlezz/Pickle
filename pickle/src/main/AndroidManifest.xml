@@ -10,8 +10,8 @@
     <application android:requestLegacyExternalStorage="true">
         <activity
             android:name=".PickleActivity"
-            android:configChanges="orientation|screenSize"
-            android:theme="@style/Theme.AppCompat.NoActionBar" />
+            android:theme="@style/PickleTheme" />
+<!--        android:theme="@style/Theme.AppCompat.NoActionBar" />-->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.pickle.fileprovider"

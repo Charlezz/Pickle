@@ -4,7 +4,7 @@ import com.charlezz.pickle.BR
 import com.charlezz.pickle.R
 import com.charlezz.pickle.util.recyclerview.DataBindingAware
 
-class CameraItem(val listener:OnItemClickListener) : DataBindingAware {
+class CameraItem(val listener: OnItemClickListener) : DataBindingAware {
     override fun getLayoutResId() = R.layout.view_camera_item
 
     override fun getBindingResId() = BR.item

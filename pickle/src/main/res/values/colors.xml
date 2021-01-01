@@ -27,5 +27,7 @@
     <color name="GR700A">#00C853</color>
 
     <color name="light_white">#80ffffff</color>
+    <color name="white">#ffffff</color>
+    <color name="black">#000000</color>
 
 </resources>

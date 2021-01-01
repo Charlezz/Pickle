@@ -12,19 +12,23 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/black"
         android:onClick="@{v-> item.listener.onCameraClick()}"
         >
         <ImageView
             android:id="@+id/image"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:scaleType="centerCrop"
+            app:layout_constraintWidth_percent="0.5"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:src="@android:drawable/ic_menu_camera" />
+            android:contentDescription="@string/desc_camera"
+            app:tint="@color/white"
+            tools:tint="@color/white"
+            android:src="@drawable/camera_alt_24px" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

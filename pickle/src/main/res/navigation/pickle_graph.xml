@@ -7,6 +7,24 @@
 
     <fragment
         android:id="@+id/pickleFragment"
-        android:name="com.charlezz.pickle.PickleFragment"
-        android:label="PickleFragment" />
+        android:name="com.charlezz.pickle.fragments.main.PickleFragment"
+        android:label="PickleFragment"
+        tools:layout="@layout/fragment_pickle">
+        <action
+            android:id="@+id/action_pickleFragment_to_pickleDetailFragment"
+            app:destination="@id/pickleDetailFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/pickleDetailFragment"
+        android:name="com.charlezz.pickle.fragments.detail.PickleDetailFragment"
+        android:label="PickleDetailFragment"
+        tools:layout="@layout/fragment_pickle_detail" >
+        <argument
+            android:name="media"
+            app:argType="com.charlezz.pickle.data.entity.Media" />
+        <argument
+            android:name="position"
+            app:argType="integer"
+            android:defaultValue="0" />
+    </fragment>
 </navigation>

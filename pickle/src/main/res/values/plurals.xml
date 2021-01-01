@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="numberOfMedia">
+        <item quantity="zero"></item>
+        <item quantity="one">%d medium</item>
+        <item quantity="other">%d media</item>
+    </plurals>
+</resources>
