@@ -18,8 +18,8 @@ class PickleContentObserver @Inject constructor(
 
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-    fun register(){
-        Timber.i("register()")
+    fun onPause(){
+        Timber.d("register()")
         context.contentResolver.registerContentObserver(
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
             true,
@@ -28,14 +28,14 @@ class PickleContentObserver @Inject constructor(
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
-    fun unregister(){
-        Timber.i("unregister()")
+    fun onResume(){
+        Timber.d("unregister()")
         context.contentResolver.unregisterContentObserver(this)
     }
 
     override fun onChange(selfChange: Boolean, uri: Uri?) {
         super.onChange(selfChange, uri)
-        Timber.i("onChange : selfChange = $selfChange uri = $uri onMainThread = ${Thread.currentThread() == Looper.getMainLooper().thread}")
+        Timber.d("onChange : selfChange = $selfChange uri = $uri onMainThread = ${Thread.currentThread() == Looper.getMainLooper().thread}")
         contentChangedEvent.value = uri
 
     }

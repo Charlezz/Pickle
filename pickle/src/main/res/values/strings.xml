@@ -3,4 +3,8 @@
     <string name="confirm">OK</string>
     <string name="select">Select</string>
     <string name="toast_error_file_create">Can not create a file</string>
+    <string name="done">Done</string>
+    <string name="desc_check_box">CheckBox</string>
+    <string name="desc_camera">Camera</string>
+    <string name="desc_thumbnail">Thumbnail</string>
 </resources>

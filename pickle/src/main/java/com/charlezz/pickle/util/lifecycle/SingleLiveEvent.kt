@@ -8,7 +8,7 @@ import androidx.lifecycle.Observer
 import java.util.concurrent.atomic.AtomicBoolean
 
 
-class SingleLiveEvent<T>(val interval: Long = NO_INTERVAL) : MutableLiveData<T?>() {
+class SingleLiveEvent<T>(private val interval: Long = NO_INTERVAL) : MutableLiveData<T?>() {
 
     companion object {
         const val NO_INTERVAL = 0L

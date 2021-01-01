@@ -1,22 +1,21 @@
 package com.charlezz.pickle
 
-import javax.inject.Inject
+import android.os.Parcelable
+import com.charlezz.pickle.data.entity.Media
+import kotlinx.parcelize.Parcelize
 
-class Selection<T> @Inject constructor(
+@Parcelize
+class Selection(private val selectedItems: LinkedHashMap<Long, Media> = LinkedHashMap()) :Parcelable {
 
-) {
-
-    private val selectedItems = HashMap<Long, T>()
-
-    fun select(id: Long, item: T) {
+    private fun select(id: Long, item: Media) {
         selectedItems[id] = item
     }
 
-    fun deselect(id: Long) {
+    private fun deselect(id: Long) {
         selectedItems.remove(id)
     }
 
-    fun toggle(id: Long, item: T) {
+    fun toggle(id: Long, item: Media) {
         if (isSelected(id)) {
             deselect(id)
         } else {
@@ -28,7 +27,7 @@ class Selection<T> @Inject constructor(
         return selectedItems.containsKey(id)
     }
 
-    fun toList(): List<T> {
+    fun toList(): List<Media> {
         return selectedItems.values.toList()
     }
 

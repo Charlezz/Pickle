@@ -1,9 +1,11 @@
 package com.charlezz.pickle.util.ext
 
 import android.view.View
-import androidx.databinding.BindingAdapter
+import android.view.ViewGroup
+import androidx.core.view.updateLayoutParams
 
-@BindingAdapter("visible")
-fun setVisible(view : View, visible:Boolean?){
-    view.visibility = if(visible==true) View.VISIBLE else View.GONE
+
+
+fun View.setMarginTop(value: Int) = updateLayoutParams<ViewGroup.MarginLayoutParams> {
+    topMargin = value
 }

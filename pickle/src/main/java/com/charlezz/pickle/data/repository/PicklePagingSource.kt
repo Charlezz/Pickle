@@ -9,19 +9,23 @@ import androidx.core.database.getLongOrNull
 import androidx.core.database.getStringOrNull
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.charlezz.pickle.PickleConstants
 import com.charlezz.pickle.data.entity.Media
 import com.charlezz.pickle.util.DeviceUtil
+import com.charlezz.pickle.util.PickleConstants
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import timber.log.Timber
-import javax.inject.Inject
 import kotlin.math.max
 
 @SuppressLint("RequiresApi", "InlinedApi")
-class PicklePagingSource @Inject constructor(
+@OptIn(ExperimentalCoroutinesApi::class)
+class PicklePagingSource(
     context: Context,
     bucketId: Int? = null,
-    selectionType: SelectionType
+    selectionType: SelectionType,
+    countChannel: ConflatedBroadcastChannel<Int?>
 ) : PagingSource<Int, Media>() {
+
 
     private val cursor: Cursor?
 
@@ -51,7 +55,7 @@ class PicklePagingSource @Inject constructor(
         }
         Timber.d("initialized:${hashCode()}")
         var selection: String
-        var selectionArgs: MutableList<String>
+        val selectionArgs: MutableList<String>
 
         when (selectionType) {
             SelectionType.IMAGE -> {
@@ -96,7 +100,8 @@ class PicklePagingSource @Inject constructor(
             selectionArgs.toTypedArray(),
             sortOrder
         )
-        Timber.i("Cursor.count = ${cursor?.count}")
+        countChannel.offer(cursor?.count)
+        Timber.d("Cursor.count = ${cursor?.count}")
 
     }
 
@@ -106,11 +111,11 @@ class PicklePagingSource @Inject constructor(
                 return LoadResult.Error(IllegalArgumentException("Cursor is null"))
             }
 
-            var key: Int =
+            val key: Int =
                 params.key ?: return LoadResult.Error(IllegalArgumentException("key is null"))
 
 
-            var prevKey: Int? = if (key == 0) {
+            val prevKey: Int? = if (key == 0) {
                 null
             } else {
                 max(key - params.loadSize, 0)
@@ -125,7 +130,7 @@ class PicklePagingSource @Inject constructor(
                     key + params.loadSize
                 }
             }
-            Timber.i("load key=${params.key}, loadSize=${params.loadSize}, prevKey=$prevKey nextKey=$nextKey")
+            Timber.d("load key=${params.key}, loadSize=${params.loadSize}, prevKey=$prevKey nextKey=$nextKey")
             return LoadResult.Page(
                 data = getMediaList(key = key, nextKey = nextKey, loadSize = params.loadSize),
                 prevKey = prevKey,
@@ -140,7 +145,7 @@ class PicklePagingSource @Inject constructor(
     override fun getRefreshKey(state: PagingState<Int, Media>): Int? {
         val refreshKey: Int? =
             (state.anchorPosition?.div(PickleConstants.DEFAULT_PAGE_SIZE))?.times(PickleConstants.DEFAULT_PAGE_SIZE)
-        Timber.i("refreshKey = $refreshKey, anchorPosition = ${state.anchorPosition}")
+        Timber.d("refreshKey = $refreshKey, anchorPosition = ${state.anchorPosition}")
         return refreshKey
     }
 
@@ -181,6 +186,9 @@ class PicklePagingSource @Inject constructor(
         return mediaList
 
     }
+
+    override val jumpingSupported: Boolean
+        get() = true
 
     enum class SelectionType {
         IMAGE,
