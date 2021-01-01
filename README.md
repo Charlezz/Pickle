@@ -1,6 +1,6 @@
 # Pickle - The fastest image picker for Android
 ## 🚧🚧Work in Progress🚧🚧
-[ ![Download](https://api.bintray.com/packages/charlezz/Pickle/com.charlezz.pickle/images/download.svg?version=1.0.0-alpha02) ](https://bintray.com/charlezz/Pickle/com.charlezz.pickle/1.0.0-alpha/link)
+[ ![Download](https://api.bintray.com/packages/charlezz/Pickle/com.charlezz.pickle/images/download.svg) ](https://bintray.com/charlezz/Pickle/com.charlezz.pickle/)
 <p>
 <img src="https://github.com/Charlezz/Pickle/blob/main/pickle.jpg" width="200">
 <br>
