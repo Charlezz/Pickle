@@ -60,11 +60,7 @@ class PickleActivity : AppCompatActivity(), HasAndroidInjector {
     private lateinit var sharedViewModel: PickleSharedViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (BuildConfig.DEBUG) {
-            Timber.plant(Timber.DebugTree())
-        } else {
-            Timber.plant(Timber.asTree())
-        }
+        Timber.plant(Timber.DebugTree())
         injectIfNecessary()
         super.onCreate(savedInstanceState)
         Timber.d("onCreate")
