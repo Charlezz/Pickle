@@ -19,7 +19,7 @@ ext {
     siteUrl = 'https://github.com/Charlezz/Pickle'    // git repo url
     gitUrl = 'https://github.com/Charlezz/Pickle.git' // git repo vcs url
 
-    libraryVersion = "1.0.0-alpha"      // library version, use $appVersionName instead
+    libraryVersion = appVersionName      // library version, use $appVersionName instead
 
     developerId = 'charlezz'                // This is your bintray username
     developerName = 'Charlezz'              // Developer's name
