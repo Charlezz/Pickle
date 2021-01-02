@@ -8,7 +8,7 @@ Designed based on Paging3.
 
 ## Installation
 ```bash
-implementation 'com.charlezz:pickle:1.0.0-alpha'
+implementation 'com.charlezz:pickle:latest_version'
 ```
 ## How to use
 1. Initilization
