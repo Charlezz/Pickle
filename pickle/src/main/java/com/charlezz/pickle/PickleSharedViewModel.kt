@@ -2,6 +2,7 @@ package com.charlezz.pickle
 
 import android.app.Application
 import android.net.Uri
+import android.view.View
 import androidx.lifecycle.*
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
@@ -51,12 +52,12 @@ class PickleSharedViewModel @AssistedInject constructor(
     val selection: Selection = savedStateHandle.get<Selection>(KEY_SAVED_SELECTION) ?: Selection()
 
     val toolbarViewModel = ToolbarViewModel().apply {
-        title = config.title
+        title.value = config.title
     }
 
     val bindingItemAdapterPosition = AtomicInteger(PickleConstants.NO_POSITION)
 
-    val itemClickEvent = SingleLiveEvent<Pair<Media, Int>>()
+    val itemClickEvent = SingleLiveEvent<Triple<View, Media, Int>?>()
 
     val items: Flow<PagingData<MediaItem>> = savedStateHandle.getLiveData<Int>(KEY_SAVED_START_POSITION)
         .asFlow()
@@ -81,8 +82,8 @@ class PickleSharedViewModel @AssistedInject constructor(
         }
     }
 
-    override fun onItemClick(item: MediaItem, position: Int) {
-        itemClickEvent.value = Pair(item.media, position)
+    override fun onItemClick(view: View, item: MediaItem, position: Int) {
+        itemClickEvent.value = Triple(view, item.media, position)
     }
 
     override fun onCheckBoxClick(item: MediaItem) {

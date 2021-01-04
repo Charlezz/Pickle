@@ -33,6 +33,8 @@
             app:toolbar_title="@{toolbarViewModel.title}"
             app:toolbar_subtitle="@{toolbarViewModel.subtitle}"
             app:toolbar_subtitle_visible="@{toolbarViewModel.subtitleVisible}"
+            app:window_marginTop="@{toolbarViewModel.marginTop}"
+            app:window_includeInsets="@{toolbarViewModel.marginIncludeInsets}"
             app:visible="@{toolbarViewModel.visible}"
             />
     </androidx.constraintlayout.widget.ConstraintLayout>

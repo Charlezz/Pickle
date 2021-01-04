@@ -1,33 +1,18 @@
 package com.charlezz.pickle
 
-import androidx.databinding.BaseObservable
-import androidx.databinding.Bindable
+import androidx.lifecycle.MutableLiveData
 
-class ToolbarViewModel : BaseObservable() {
-    var visible: Boolean = true
-    set(value){
-        field = value
-        notifyPropertyChanged(BR.visible)
-    }
-    @Bindable get
+class ToolbarViewModel {
+    var visible = MutableLiveData(true)
 
-    var title: CharSequence? = "Pickle"
-        set(value) {
-            field = value
-            notifyPropertyChanged(BR.title)
-        }
-        @Bindable get
-    var subtitle: CharSequence? = null
-        set(value) {
-            field = value
-            notifyPropertyChanged(BR.subtitle)
-        }
-        @Bindable get
+    var title = MutableLiveData<CharSequence?>("Pickle")
 
-    var subtitleVisible:Boolean = true
-    set(value){
-        field = value
-        notifyPropertyChanged(BR.subtitleVisible)
-    }
-    @Bindable get
+    var subtitle = MutableLiveData<CharSequence>()
+
+    var subtitleVisible = MutableLiveData(true)
+
+    var marginTop = MutableLiveData(0)
+
+    var marginIncludeInsets = MutableLiveData(true)
+
 }

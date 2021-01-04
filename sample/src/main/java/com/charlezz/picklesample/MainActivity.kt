@@ -17,8 +17,8 @@ class MainActivity : AppCompatActivity() {
 
     private val adapter = MainAdapter()
 
-    private val launcher = getPickle { mediaList:List<Media> ->
-        Log.d("MainActivity","list.size = ${mediaList.size} $mediaList")
+    private val launcher = getPickle { mediaList: List<Media> ->
+        Log.d("MainActivity", "list.size = ${mediaList.size} $mediaList")
         adapter.setImages(mediaList)
     }
 
@@ -33,16 +33,17 @@ class MainActivity : AppCompatActivity() {
             })
         }
 
-        if(savedInstanceState==null){
-//            launcher.launch(Config.default.apply {
-//                title = "Pickle ${BuildConfig.VERSION_NAME}"
-//            })
+        if (savedInstanceState == null) {
+            launcher.launch(Config.default.apply {
+                title = "Pickle ${BuildConfig.VERSION_NAME}"
+            })
         }
 
         adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
             override fun onChanged() {
                 super.onChanged()
-                binding.noImages.visibility = if (adapter.itemCount == 0) View.VISIBLE else View.GONE
+                binding.noImages.visibility =
+                    if (adapter.itemCount == 0) View.VISIBLE else View.GONE
             }
         })
 

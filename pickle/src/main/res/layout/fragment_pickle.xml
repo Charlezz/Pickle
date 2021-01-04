@@ -4,7 +4,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
+
     <data>
+        <import type="com.charlezz.pickle.util.MeasureUtil"/>
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -15,6 +17,8 @@
             android:id="@+id/recycler_view"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            app:window_marginTop="@{MeasureUtil.INSTANCE.getToolBarHeight(context)}"
+            app:window_includeInsets="@{true}"
             tools:listitem="@layout/view_pickle_media"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

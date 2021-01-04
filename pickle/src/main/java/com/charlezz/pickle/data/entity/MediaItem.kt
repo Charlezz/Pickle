@@ -3,6 +3,7 @@ package com.charlezz.pickle.data.entity
 import android.content.ContentUris
 import android.net.Uri
 import android.provider.MediaStore
+import android.view.View
 import androidx.databinding.BaseObservable
 
 class MediaItem constructor(
@@ -25,7 +26,7 @@ class MediaItem constructor(
     fun getId() = media.id
 
     interface OnItemClickListener {
-        fun onItemClick(item: MediaItem, position:Int)
+        fun onItemClick(view: View, item: MediaItem, position:Int)
 
         fun onCheckBoxClick(item: MediaItem)
     }
