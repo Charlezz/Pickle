@@ -10,6 +10,6 @@ class PickleAdapters @Inject constructor(
     val concatedAdapter = ConcatAdapter(headerAdapter,itemAdapter)
 
 
-    fun headerItemCount():Int = headerAdapter.itemCount
+    fun getHeaderItemCount():Int = headerAdapter.itemCount
 
 }
