@@ -7,8 +7,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-import android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+import android.view.View
 import android.view.WindowInsets
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -47,7 +46,7 @@ class PickleActivity : AppCompatActivity(), HasAndroidInjector {
     lateinit var pickleContentObserver: PickleContentObserver
 
     @Inject
-    lateinit var config:Config
+    lateinit var config: Config
 
     private val binding: ActivityPickleBinding by lazy {
         DataBindingUtil.setContentView(this, R.layout.activity_pickle)
@@ -59,11 +58,10 @@ class PickleActivity : AppCompatActivity(), HasAndroidInjector {
 
     private lateinit var sharedViewModel: PickleSharedViewModel
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         injectIfNecessary()
         super.onCreate(savedInstanceState)
-        if(Timber.treeCount() == 0 && config.debugMode){
+        if (Timber.treeCount() == 0 && config.debugMode) {
             Timber.plant(Timber.DebugTree())
         }
         Timber.d("onCreate hashCode = ${hashCode()} savedInstanceState = $savedInstanceState")
@@ -76,7 +74,7 @@ class PickleActivity : AppCompatActivity(), HasAndroidInjector {
             if (isGranted) {
                 setupNavigationComponent()
                 setupViewModel()
-                setupStatusBar()
+                setupSystemUI()
                 pickleContentObserver.getContentChangedEvent().observe(this) {
                     sharedViewModel.repository.invalidate()
                 }
@@ -92,38 +90,28 @@ class PickleActivity : AppCompatActivity(), HasAndroidInjector {
             .replace(R.id.fragmentContainerView, navHostFragment)
             .setPrimaryNavigationFragment(navHostFragment)
             .commitNow()
-
-        navHostFragment.navController.addOnDestinationChangedListener { _, destination, _ ->
-            Timber.d("destination = $destination")
-            when (destination.id) {
-                R.id.pickleFragment -> { }
-                R.id.pickleDetailFragment -> { }
-            }
-        }
     }
 
-    private fun setupViewModel(){
-
-//        val factory = injectingSavedStateViewModelFactory.create(this)
-//        val viewModelProvider = ViewModelProvider(navHostFragment, factory)
-//        this.sharedViewModel = viewModelProvider.get(PickleSharedViewModel::class.java)
+    private fun setupViewModel() {
         this.sharedViewModel = sharedViewModelProvider.get(PickleSharedViewModel::class.java)
         binding.toolbarViewModel = sharedViewModel.toolbarViewModel
         lifecycle.addObserver(sharedViewModel)
     }
 
-    private fun setupStatusBar() {
+    private fun setupSystemUI() {
         Timber.d("setupStatusBar")
         when {
             DeviceUtil.isAndroid11Later() -> {
                 window.statusBarColor = Color.TRANSPARENT
+                window.navigationBarColor = Color.TRANSPARENT
                 window.setDecorFitsSystemWindows(false)
                 window.insetsController?.show(WindowInsets.Type.systemBars())
             }
             DeviceUtil.isAndroid5Later() -> {
                 window.statusBarColor = Color.TRANSPARENT
+                window.navigationBarColor = Color.TRANSPARENT
                 binding.rootLayout.systemUiVisibility =
-                    SYSTEM_UI_FLAG_LAYOUT_STABLE or SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
             }
             else -> {
                 val constraintSet = ConstraintSet()
@@ -186,6 +174,5 @@ class PickleActivity : AppCompatActivity(), HasAndroidInjector {
         injectIfNecessary()
         return androidInjector
     }
-
 
 }

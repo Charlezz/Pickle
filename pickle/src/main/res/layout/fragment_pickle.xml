@@ -6,24 +6,29 @@
 
 
     <data>
-        <import type="com.charlezz.pickle.util.MeasureUtil"/>
+
+        <import type="com.charlezz.pickle.util.MeasureUtil" />
+
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_view"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            app:window_marginTop="@{MeasureUtil.INSTANCE.getToolBarHeight(context)}"
-            app:window_includeInsets="@{true}"
-            tools:listitem="@layout/view_pickle_media"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:window_includeInsets="@{true}"
+            app:window_marginTop="@{MeasureUtil.INSTANCE.getToolBarHeight(context)}"
+            app:window_marginBottom="@{0}"
+            tools:listitem="@layout/view_pickle_media" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -101,8 +101,6 @@ class PickleFragment constructor(
                 adapters.itemAdapter.submitData(it)
             }
         }
-        sharedElementEnterTransition = TransitionInflater.from(context)
-            .inflateTransition(android.R.transition.move)
     }
 
     override fun onCreateView(
@@ -112,7 +110,9 @@ class PickleFragment constructor(
     ): View {
         binding = FragmentPickleBinding.inflate(inflater, container, false)
         prepareTransitions()
-        postponeEnterTransition()
+        if(savedInstanceState == null && DeviceUtil.isAndroid5Later()){
+            postponeEnterTransition()
+        }
         return binding.root
     }
 

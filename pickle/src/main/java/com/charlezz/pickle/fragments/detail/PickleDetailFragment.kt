@@ -10,7 +10,6 @@ import androidx.core.view.ViewCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -55,21 +54,10 @@ class PickleDetailFragment : DaggerFragment(), PickleDetailAdapter.OnImageListen
 
     private lateinit var viewModel: PickleDetailViewModel
 
-    private val args: PickleDetailFragmentArgs by navArgs()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         this.sharedViewModel = sharedViewModelProvider.get(PickleSharedViewModel::class.java)
         this.viewModel = viewModelProvider.get(PickleDetailViewModel::class.java)
-
-//        adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
-//            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-//                super.onItemRangeInserted(positionStart, itemCount)
-//                val position =
-//                    sharedViewModel.bindingItemAdapterPosition.getAndSet(PickleConstants.NO_POSITION)
-//                binding.recyclerView.scrollToPosition(position)
-//            }
-//        })
 
         adapter.selection = sharedViewModel.selection
 
@@ -92,7 +80,7 @@ class PickleDetailFragment : DaggerFragment(), PickleDetailAdapter.OnImageListen
 
         binding.recyclerView
         prepareSharedElementTransition()
-        if(savedInstanceState==null){
+        if(savedInstanceState==null && DeviceUtil.isAndroid5Later()){
             postponeEnterTransition()
         }
 
@@ -207,34 +195,37 @@ class PickleDetailFragment : DaggerFragment(), PickleDetailAdapter.OnImageListen
         })
     }
     private fun prepareSharedElementTransition() {
-        val transition = TransitionInflater.from(context)
-            .inflateTransition(R.transition.image_shared_element_transition)
-        sharedElementEnterTransition = transition
+        if(DeviceUtil.isAndroid5Later()){
+            val transition = TransitionInflater.from(context)
+                .inflateTransition(R.transition.image_shared_element_transition)
+            sharedElementEnterTransition = transition
 
-        // A similar mapping is set at the GridFragment with a setExitSharedElementCallback.
-        setEnterSharedElementCallback(
-            object : SharedElementCallback() {
-                override fun onMapSharedElements(
-                    names: List<String>,
-                    sharedElements: MutableMap<String, View>
-                ) {
-                    val selectedViewHolder: RecyclerView.ViewHolder =
-                        binding.recyclerView.findViewHolderForAdapterPosition(sharedViewModel.bindingItemAdapterPosition.get())
-                            ?: return
+            // A similar mapping is set at the GridFragment with a setExitSharedElementCallback.
+            setEnterSharedElementCallback(
+                object : SharedElementCallback() {
+                    override fun onMapSharedElements(
+                        names: List<String>,
+                        sharedElements: MutableMap<String, View>
+                    ) {
+                        val selectedViewHolder: RecyclerView.ViewHolder =
+                            binding.recyclerView.findViewHolderForAdapterPosition(sharedViewModel.bindingItemAdapterPosition.get())
+                                ?: return
 
-                    // Map the first shared element name to the child ImageView.
-                    sharedElements[names[0]] = selectedViewHolder.itemView.findViewById(R.id.image)
-                }
-            })
+                        // Map the first shared element name to the child ImageView.
+                        sharedElements[names[0]] = selectedViewHolder.itemView.findViewById(R.id.image)
+                    }
+                })
+        }
     }
 
     override fun onLoaded(position: Int) {
-        if(sharedViewModel.bindingItemAdapterPosition.get() != position){
-            return
+        if(DeviceUtil.isAndroid5Later()){
+            if(sharedViewModel.bindingItemAdapterPosition.get() != position){
+                return
+            }
+
+            startPostponedEnterTransition()
         }
-
-        startPostponedEnterTransition()
     }
-
 
 }

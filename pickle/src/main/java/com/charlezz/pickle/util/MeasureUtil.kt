@@ -1,6 +1,7 @@
 package com.charlezz.pickle.util
 
 import android.content.Context
+import android.content.res.Resources
 import android.content.res.TypedArray
 import android.graphics.Rect
 import android.util.TypedValue
@@ -47,13 +48,21 @@ object MeasureUtil {
         return toolBarHeight
     }
 
-    fun getStatusBarHeight(window:Window) :Int{
+    fun getStatusBarHeight(window: Window): Int {
         val rectangle = Rect()
         window.decorView.getWindowVisibleDisplayFrame(rectangle)
         val statusBarHeight: Int = rectangle.top
         val contentView = window.findViewById<View>(Window.ID_ANDROID_CONTENT)
         val contentViewTop: Int = contentView.top
         return statusBarHeight
+    }
+
+    fun getNavigationBarHeight(context: Context): Int {
+        val resources: Resources = context.resources
+        val resourceId: Int = resources.getIdentifier("navigation_bar_height", "dimen", "android")
+        return if (resourceId > 0) {
+            resources.getDimensionPixelSize(resourceId)
+        } else 0
     }
 }
 
