@@ -8,18 +8,21 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.SharedElementCallback
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.transition.TransitionInflater
 import com.charlezz.pickle.PickleSharedViewModel
 import com.charlezz.pickle.R
 import com.charlezz.pickle.data.entity.CameraItem
 import com.charlezz.pickle.databinding.FragmentPickleBinding
 import com.charlezz.pickle.util.DeviceUtil
 import com.charlezz.pickle.util.MeasureUtil
-import com.charlezz.pickle.util.PickleConstants
 import com.charlezz.pickle.util.dagger.SharedViewModelProvider
 import com.charlezz.pickle.util.recyclerview.GridSpaceDecoration
 import dagger.android.support.DaggerFragment
@@ -31,7 +34,12 @@ import javax.inject.Provider
 import kotlin.math.max
 
 
-class PickleFragment : DaggerFragment(), CameraItem.OnItemClickListener {
+class PickleFragment constructor(
+
+) : DaggerFragment(),
+    CameraItem.OnItemClickListener,
+        PickleItemAdapter.OnImageListener
+{
 
 
     @Inject
@@ -101,12 +109,17 @@ class PickleFragment : DaggerFragment(), CameraItem.OnItemClickListener {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentPickleBinding.inflate(inflater, container, false)
+        prepareTransitions()
+        if(savedInstanceState == null && DeviceUtil.isAndroid5Later()){
+            postponeEnterTransition()
+        }
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Timber.d("onViewCreated")
+        scrollToPosition()
         requireActivity().onBackPressedDispatcher.addCallback(
             viewLifecycleOwner,
             object : OnBackPressedCallback(true) {
@@ -117,37 +130,42 @@ class PickleFragment : DaggerFragment(), CameraItem.OnItemClickListener {
 
         binding.lifecycleOwner = viewLifecycleOwner
         binding.recyclerView.adapter = adapters.concatedAdapter
+        adapters.itemAdapter.onImageListener = this
         binding.recyclerView.layoutManager = gridLayoutManager.get()
         binding.recyclerView.addItemDecoration(gridSpaceDecoration)
         binding.recyclerView.setHasFixedSize(true)
         spanCount.observe(viewLifecycleOwner) { onSpanCountChanged(it) }
         adapters.itemAdapter.selection = sharedViewModel.selection
 
-        sharedViewModel.itemClickEvent.observe(viewLifecycleOwner) { itemAndPosition ->
-            itemAndPosition?.let {
-                sharedViewModel.bindingItemAdapterPosition.set(it.second)
-                findNavController().navigate(
+        sharedViewModel.itemClickEvent.observe(viewLifecycleOwner) { triple ->
+            triple?.let {
+                val view = it.first
+                val media = it.second
+                val position = it.third
+                sharedViewModel.bindingItemAdapterPosition.set(position)
+
+                val navDirection =
                     PickleFragmentDirections.actionPickleFragmentToPickleDetailFragment(
-                        it.first,
-                        it.second
+                        media,
+                        position
                     )
-                )
+
+                if (DeviceUtil.isAndroid5Later()) {
+                    findNavController().navigate(
+                        navDirection,
+                        FragmentNavigatorExtras(view to view.transitionName)
+                    )
+                } else {
+                    findNavController().navigate(navDirection)
+                }
             }
         }
 
         sharedViewModel.itemCount.observe(viewLifecycleOwner) { count ->
             if (count != null) {
-                sharedViewModel.toolbarViewModel.subtitle = resources.getQuantityString(
+                sharedViewModel.toolbarViewModel.subtitle.value = resources.getQuantityString(
                     R.plurals.numberOfMedia, count, count
                 )
-            }
-        }
-
-        binding.recyclerView.post {
-            val currentPosition =
-                sharedViewModel.bindingItemAdapterPosition.getAndSet(PickleConstants.NO_POSITION)
-            if (currentPosition != PickleConstants.NO_POSITION) {
-                binding.recyclerView.scrollToPosition(currentPosition + adapters.headerItemCount())
             }
         }
     }
@@ -190,4 +208,60 @@ class PickleFragment : DaggerFragment(), CameraItem.OnItemClickListener {
         requireActivity().finish()
     }
 
+    private fun prepareTransitions() {
+        if(DeviceUtil.isAndroid5Later()){
+            exitTransition = TransitionInflater.from(context)
+                .inflateTransition(R.transition.grid_exit_transition)
+            setExitSharedElementCallback(
+                object : SharedElementCallback() {
+                    override fun onMapSharedElements(
+                        names: List<String>,
+                        sharedElements: MutableMap<String, View>
+                    ) {
+                        val selectedViewHolder: RecyclerView.ViewHolder =
+                            binding.recyclerView.findViewHolderForAdapterPosition(sharedViewModel.bindingItemAdapterPosition.get() + adapters.getHeaderItemCount())
+                                ?: return
+
+                        sharedElements[names[0]] =
+                            selectedViewHolder.itemView.findViewById(R.id.image)
+                    }
+                })
+        }
+    }
+
+    private fun scrollToPosition(){
+        binding.recyclerView.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
+            override fun onLayoutChange(
+                v: View,
+                left: Int,
+                top: Int,
+                right: Int,
+                bottom: Int,
+                oldLeft: Int,
+                oldTop: Int,
+                oldRight: Int,
+                oldBottom: Int
+            ) {
+                binding.recyclerView.removeOnLayoutChangeListener(this)
+                val layoutManager = binding.recyclerView.layoutManager
+                layoutManager?.let {
+                    val currentPosition = sharedViewModel.bindingItemAdapterPosition.get()+adapters.getHeaderItemCount()
+                    val viewAtPosition = layoutManager.findViewByPosition(currentPosition)
+                    if (viewAtPosition == null || layoutManager.isViewPartiallyVisible(viewAtPosition, false, true)) {
+                        binding.recyclerView.post { layoutManager.scrollToPosition(currentPosition) }
+                    }
+                }
+
+            }
+        })
+    }
+
+    override fun onLoaded(position: Int) {
+        if(DeviceUtil.isAndroid5Later()){
+            if(sharedViewModel.bindingItemAdapterPosition.get() != position){
+                return
+            }
+            startPostponedEnterTransition()
+        }
+    }
 }

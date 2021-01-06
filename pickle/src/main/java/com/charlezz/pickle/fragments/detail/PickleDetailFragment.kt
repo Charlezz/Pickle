@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
+import androidx.core.app.SharedElementCallback
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -12,11 +13,12 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
+import androidx.transition.TransitionInflater
 import com.charlezz.pickle.PickleSharedViewModel
+import com.charlezz.pickle.R
 import com.charlezz.pickle.databinding.FragmentPickleDetailBinding
 import com.charlezz.pickle.util.DeviceUtil
 import com.charlezz.pickle.util.MeasureUtil
-import com.charlezz.pickle.util.PickleConstants
 import com.charlezz.pickle.util.dagger.SharedViewModelProvider
 import dagger.android.support.DaggerFragment
 import kotlinx.coroutines.flow.collectLatest
@@ -24,7 +26,7 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Provider
 
-class PickleDetailFragment : DaggerFragment() {
+class PickleDetailFragment : DaggerFragment(), PickleDetailAdapter.OnImageListener {
 
     companion object {
         const val DEFAULT_CHECK_BOX_TOP_MARGIN = 10f
@@ -57,19 +59,16 @@ class PickleDetailFragment : DaggerFragment() {
         this.sharedViewModel = sharedViewModelProvider.get(PickleSharedViewModel::class.java)
         this.viewModel = viewModelProvider.get(PickleDetailViewModel::class.java)
 
-        adapter.registerAdapterDataObserver(object:RecyclerView.AdapterDataObserver(){
-            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-                super.onItemRangeInserted(positionStart, itemCount)
-                binding.recyclerView.scrollToPosition(sharedViewModel.bindingItemAdapterPosition.getAndSet(PickleConstants.NO_POSITION))
-            }
-        })
-
         adapter.selection = sharedViewModel.selection
 
         lifecycleScope.launchWhenCreated {
             sharedViewModel.items.collectLatest { adapter.submitData(it) }
         }
 
+        if (DeviceUtil.isAndroid5Later()) {
+            sharedElementEnterTransition = TransitionInflater.from(context)
+                .inflateTransition(android.R.transition.move)
+        }
     }
 
     override fun onCreateView(
@@ -78,17 +77,26 @@ class PickleDetailFragment : DaggerFragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentPickleDetailBinding.inflate(inflater, container, false)
+
+        binding.recyclerView
+        prepareSharedElementTransition()
+        if(savedInstanceState==null && DeviceUtil.isAndroid5Later()){
+            postponeEnterTransition()
+        }
+
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Timber.d("onViewCreated")
+        scrollToPosition()
         binding.lifecycleOwner = viewLifecycleOwner
         binding.viewModel = viewModel
 
         binding.recyclerView.setHasFixedSize(true)
         binding.recyclerView.adapter = adapter
+        adapter.onImageListener = this
         binding.recyclerView.layoutManager = linearLayoutManager.get()
         binding.recyclerView.addOnScrollListener(onScrollListener)
         pagerSnapHelper.attachToRecyclerView(binding.recyclerView)
@@ -111,12 +119,15 @@ class PickleDetailFragment : DaggerFragment() {
                 MeasureUtil.dpToPx(requireContext(), DEFAULT_CHECK_BOX_TOP_MARGIN)
         }
 
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner,onBackPressedCallback)
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            onBackPressedCallback
+        )
 
     }
 
     private val onScrollListener = object : RecyclerView.OnScrollListener() {
-        fun onScrolled(){
+        fun onScrolled() {
             val currentPosition =
                 (binding.recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
 
@@ -125,10 +136,11 @@ class PickleDetailFragment : DaggerFragment() {
                 viewModel.currentMediaItem?.let { item ->
                     viewModel.isChecked.value = sharedViewModel.selection.isSelected(item.getId())
                 }
-                sharedViewModel.toolbarViewModel.subtitle =
+                sharedViewModel.toolbarViewModel.subtitle.value =
                     "${currentPosition + 1} / ${sharedViewModel.itemCount.value}"
             }
         }
+
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             super.onScrollStateChanged(recyclerView, newState)
             viewModel.checkBoxEnabled.value = (newState == RecyclerView.SCROLL_STATE_IDLE)
@@ -141,13 +153,78 @@ class PickleDetailFragment : DaggerFragment() {
         }
     }
 
-    private val onBackPressedCallback = object:OnBackPressedCallback(true){
+    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             val layoutManager = binding.recyclerView.layoutManager as LinearLayoutManager
             val position = layoutManager.findFirstCompletelyVisibleItemPosition()
             sharedViewModel.bindingItemAdapterPosition.set(position)
             Timber.d("save position = $position")
             findNavController().navigateUp()
+        }
+    }
+
+    private fun scrollToPosition(){
+        binding.recyclerView.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
+            override fun onLayoutChange(
+                v: View,
+                left: Int,
+                top: Int,
+                right: Int,
+                bottom: Int,
+                oldLeft: Int,
+                oldTop: Int,
+                oldRight: Int,
+                oldBottom: Int
+            ) {
+                binding.recyclerView.removeOnLayoutChangeListener(this)
+                val layoutManager = binding.recyclerView.layoutManager
+                layoutManager?.let {
+                    val currentPosition = sharedViewModel.bindingItemAdapterPosition.get()
+                    val viewAtPosition = layoutManager.findViewByPosition(currentPosition)
+                    if (viewAtPosition == null || layoutManager.isViewPartiallyVisible(
+                            viewAtPosition,
+                            false,
+                            true
+                        )
+                    ) {
+                        binding.recyclerView.post { layoutManager.scrollToPosition(currentPosition) }
+                    }
+                }
+
+            }
+        })
+    }
+    private fun prepareSharedElementTransition() {
+        if(DeviceUtil.isAndroid5Later()){
+            val transition = TransitionInflater.from(context)
+                .inflateTransition(R.transition.image_shared_element_transition)
+            sharedElementEnterTransition = transition
+
+            // A similar mapping is set at the GridFragment with a setExitSharedElementCallback.
+            setEnterSharedElementCallback(
+                object : SharedElementCallback() {
+                    override fun onMapSharedElements(
+                        names: List<String>,
+                        sharedElements: MutableMap<String, View>
+                    ) {
+                        val selectedViewHolder: RecyclerView.ViewHolder =
+                            binding.recyclerView.findViewHolderForAdapterPosition(sharedViewModel.bindingItemAdapterPosition.get())
+                                ?: return
+
+                        // Map the first shared element name to the child ImageView.
+                        sharedElements[names[0]] = selectedViewHolder.itemView.findViewById(R.id.image)
+                    }
+                })
+        }
+    }
+
+    override fun onLoaded(position: Int) {
+        if(DeviceUtil.isAndroid5Later()){
+            if(sharedViewModel.bindingItemAdapterPosition.get() != position){
+                return
+            }
+
+            startPostponedEnterTransition()
         }
     }
 
