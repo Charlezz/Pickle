@@ -1,4 +1,4 @@
-package com.charlezz.pickle.data.repository
+package com.charlezz.pickle.fragments.main
 
 import androidx.paging.PagingData
 import com.charlezz.pickle.data.entity.Media
@@ -7,8 +7,8 @@ import kotlinx.coroutines.flow.Flow
 interface PickleRepository {
 
     fun getItems(
-        selectionType:PicklePagingSource.SelectionType,
-        bucketId: Int?,
+        selectionType: PicklePagingSource.SelectionType,
+        bucketId: Long?,
         startPosition: Int,
         pageSize: Int
     ): Flow<PagingData<Media>>

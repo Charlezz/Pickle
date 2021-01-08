@@ -5,8 +5,8 @@ import android.database.ContentObserver
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
-import android.provider.MediaStore
 import androidx.lifecycle.*
+import com.charlezz.pickle.util.PickleConstants
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -16,12 +16,11 @@ class PickleContentObserver @Inject constructor(
 
     private val contentChangedEvent = MutableLiveData<Uri?>()
 
-
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
     fun onPause(){
         Timber.d("register()")
         context.contentResolver.registerContentObserver(
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            PickleConstants.getContentUri(),
             true,
             this
         )
@@ -31,6 +30,7 @@ class PickleContentObserver @Inject constructor(
     fun onResume(){
         Timber.d("unregister()")
         context.contentResolver.unregisterContentObserver(this)
+
     }
 
     override fun onChange(selfChange: Boolean, uri: Uri?) {

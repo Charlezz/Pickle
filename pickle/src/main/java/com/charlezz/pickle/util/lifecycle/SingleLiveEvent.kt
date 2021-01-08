@@ -8,7 +8,7 @@ import androidx.lifecycle.Observer
 import java.util.concurrent.atomic.AtomicBoolean
 
 
-class SingleLiveEvent<T>(private val interval: Long = NO_INTERVAL) : MutableLiveData<T?>() {
+class SingleLiveEvent<T> constructor(private val interval: Long = NO_INTERVAL) : MutableLiveData<T?>() {
 
     companion object {
         const val NO_INTERVAL = 0L
@@ -28,7 +28,7 @@ class SingleLiveEvent<T>(private val interval: Long = NO_INTERVAL) : MutableLive
 
     @MainThread
     override fun setValue(t: T?) {
-        if (0 > NO_INTERVAL) {
+        if (interval != NO_INTERVAL) {
             val currentClickTime = SystemClock.uptimeMillis()
             val elapsedTime: Long = currentClickTime - lastClickTime
             lastClickTime = currentClickTime

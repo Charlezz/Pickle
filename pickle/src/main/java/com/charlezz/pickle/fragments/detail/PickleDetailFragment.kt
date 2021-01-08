@@ -80,7 +80,7 @@ class PickleDetailFragment : DaggerFragment(), PickleDetailAdapter.OnImageListen
 
         binding.recyclerView
         prepareSharedElementTransition()
-        if(savedInstanceState==null && DeviceUtil.isAndroid5Later()){
+        if (savedInstanceState == null && DeviceUtil.isAndroid5Later()) {
             postponeEnterTransition()
         }
 
@@ -135,9 +135,11 @@ class PickleDetailFragment : DaggerFragment(), PickleDetailAdapter.OnImageListen
                 viewModel.currentMediaItem = adapter.peek(currentPosition)
                 viewModel.currentMediaItem?.let { item ->
                     viewModel.isChecked.value = sharedViewModel.selection.isSelected(item.getId())
+                    sharedViewModel.toolbarViewModel.title.value = item.media.name
+                    sharedViewModel.toolbarViewModel.subtitle.value =
+                        "${currentPosition + 1} / ${sharedViewModel.itemCount.value}"
                 }
-                sharedViewModel.toolbarViewModel.subtitle.value =
-                    "${currentPosition + 1} / ${sharedViewModel.itemCount.value}"
+
             }
         }
 
@@ -163,7 +165,7 @@ class PickleDetailFragment : DaggerFragment(), PickleDetailAdapter.OnImageListen
         }
     }
 
-    private fun scrollToPosition(){
+    private fun scrollToPosition() {
         binding.recyclerView.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
             override fun onLayoutChange(
                 v: View,
@@ -194,8 +196,9 @@ class PickleDetailFragment : DaggerFragment(), PickleDetailAdapter.OnImageListen
             }
         })
     }
+
     private fun prepareSharedElementTransition() {
-        if(DeviceUtil.isAndroid5Later()){
+        if (DeviceUtil.isAndroid5Later()) {
             val transition = TransitionInflater.from(context)
                 .inflateTransition(R.transition.image_shared_element_transition)
             sharedElementEnterTransition = transition
@@ -212,15 +215,16 @@ class PickleDetailFragment : DaggerFragment(), PickleDetailAdapter.OnImageListen
                                 ?: return
 
                         // Map the first shared element name to the child ImageView.
-                        sharedElements[names[0]] = selectedViewHolder.itemView.findViewById(R.id.image)
+                        sharedElements[names[0]] =
+                            selectedViewHolder.itemView.findViewById(R.id.image)
                     }
                 })
         }
     }
 
     override fun onLoaded(position: Int) {
-        if(DeviceUtil.isAndroid5Later()){
-            if(sharedViewModel.bindingItemAdapterPosition.get() != position){
+        if (DeviceUtil.isAndroid5Later()) {
+            if (sharedViewModel.bindingItemAdapterPosition.get() != position) {
                 return
             }
 

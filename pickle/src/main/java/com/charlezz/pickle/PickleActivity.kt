@@ -58,6 +58,8 @@ class PickleActivity : AppCompatActivity(), HasAndroidInjector {
 
     private lateinit var sharedViewModel: PickleSharedViewModel
 
+    private var doneMenuItem: MenuItem? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         injectIfNecessary()
         super.onCreate(savedInstanceState)
@@ -78,6 +80,8 @@ class PickleActivity : AppCompatActivity(), HasAndroidInjector {
                 pickleContentObserver.getContentChangedEvent().observe(this) {
                     sharedViewModel.repository.invalidate()
                 }
+                navHostFragment.navController.addOnDestinationChangedListener { controller, destination, arguments -> invalidateOptionsMenu() }
+                sharedViewModel.selection.getCount().observe(this) { invalidateOptionsMenu() }
             } else {
                 finish()
             }
@@ -118,7 +122,8 @@ class PickleActivity : AppCompatActivity(), HasAndroidInjector {
                 constraintSet.clone(binding.rootLayout)
                 constraintSet.connect(
                     binding.fragmentContainerView.id, ConstraintSet.TOP,
-                    binding.toolBar.id, ConstraintSet.BOTTOM)
+                    binding.toolBar.id, ConstraintSet.BOTTOM
+                )
                 binding.fragmentContainerView
                 constraintSet.applyTo(binding.rootLayout)
 
@@ -126,27 +131,29 @@ class PickleActivity : AppCompatActivity(), HasAndroidInjector {
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        val menuItem = menu?.add(MENU_GROUP_ID, MENU_ITEM_DONE_ID, MENU_ITEM_DONE_ID, R.string.done)
-        menuItem?.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM)
-        return super.onCreateOptionsMenu(menu)
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        when (navHostFragment.navController.currentDestination?.id) {
+            R.id.pickleFragment, R.id.pickleDetailFragment -> {
+                doneMenuItem =
+                    menu?.add(MENU_GROUP_ID, MENU_ITEM_DONE_ID, MENU_ITEM_DONE_ID, R.string.done)
+                doneMenuItem?.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM)
+                doneMenuItem?.isEnabled = !sharedViewModel.selection.isEmpty()
+            }
+        }
+        return super.onPrepareOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.groupId) {
-            MENU_GROUP_ID -> {
-                when (item.itemId) {
-                    android.R.id.home -> onBackPressed()
-                    MENU_ITEM_DONE_ID -> {
-                        setResult(Activity.RESULT_OK, Intent().apply {
-                            putParcelableArrayListExtra(
-                                "media",
-                                ArrayList(sharedViewModel.getSelectedMediaList())
-                            )
-                        })
-                        finish()
-                    }
-                }
+        when (item.itemId) {
+            android.R.id.home -> onBackPressed()
+            MENU_ITEM_DONE_ID -> {
+                setResult(Activity.RESULT_OK, Intent().apply {
+                    putParcelableArrayListExtra(
+                        "media",
+                        ArrayList(sharedViewModel.getSelectedMediaList())
+                    )
+                })
+                finish()
             }
         }
         return super.onOptionsItemSelected(item)

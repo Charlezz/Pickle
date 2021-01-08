@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="pickle_column_width">120dp</dimen>
+    <dimen name="pickle_column_width">105dp</dimen>
+    <dimen name="pickle_folder_corner_radius">15dp</dimen>
+    <dimen name="pickle_folder_outline_width">1px</dimen>
+
 </resources>

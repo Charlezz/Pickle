@@ -7,18 +7,20 @@ import androidx.lifecycle.*
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
+import com.charlezz.pickle.data.entity.Album
 import com.charlezz.pickle.data.entity.Media
 import com.charlezz.pickle.data.entity.MediaItem
 import com.charlezz.pickle.data.entity.getUri
-import com.charlezz.pickle.data.repository.AppPickleRepository
-import com.charlezz.pickle.data.repository.PicklePagingSource
-import com.charlezz.pickle.data.repository.PickleRepository
+import com.charlezz.pickle.fragments.main.AppPickleRepository
+import com.charlezz.pickle.fragments.main.PicklePagingSource
+import com.charlezz.pickle.fragments.main.PickleRepository
 import com.charlezz.pickle.util.CameraUtil
 import com.charlezz.pickle.util.PickleConstants
 import com.charlezz.pickle.util.dagger.AssistedSavedStateViewModelFactory
 import com.charlezz.pickle.util.lifecycle.SingleLiveEvent
 import com.squareup.inject.assisted.Assisted
 import com.squareup.inject.assisted.AssistedInject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -27,6 +29,7 @@ import java.io.IOException
 import java.util.concurrent.atomic.AtomicInteger
 
 
+@ExperimentalCoroutinesApi
 class PickleSharedViewModel @AssistedInject constructor(
     val app: Application,
     val config: Config,
@@ -36,14 +39,14 @@ class PickleSharedViewModel @AssistedInject constructor(
     MediaItem.OnItemClickListener {
 
     companion object {
-        const val KEY_SAVED_START_POSITION = "key_saved_position"
+        const val KEY_FOLDER = "key_folder"
         const val KEY_SAVED_SELECTION = "key_saved_selection"
         const val KEY_SAVED_IMAGE_PATH = "KEY_SAVED_IMAGE_PATH"
     }
 
     val repository: PickleRepository = AppPickleRepository(app)
 
-    val cameraUtil: CameraUtil = CameraUtil(app).apply {
+    val cameraUtil: CameraUtil = CameraUtil(app, config.environmentDir, config.dirToSave).apply {
         val savedImagePath = savedStateHandle.get<String>(KEY_SAVED_IMAGE_PATH)
         Timber.d("savedImagePath = $savedImagePath")
         currentImagePath = savedImagePath
@@ -51,21 +54,19 @@ class PickleSharedViewModel @AssistedInject constructor(
 
     val selection: Selection = savedStateHandle.get<Selection>(KEY_SAVED_SELECTION) ?: Selection()
 
-    val toolbarViewModel = ToolbarViewModel().apply {
-        title.value = config.title
-    }
+    val toolbarViewModel = ToolbarViewModel()
 
     val bindingItemAdapterPosition = AtomicInteger(PickleConstants.NO_POSITION)
 
     val itemClickEvent = SingleLiveEvent<Triple<View, Media, Int>?>()
 
-    val items: Flow<PagingData<MediaItem>> = savedStateHandle.getLiveData<Int>(KEY_SAVED_START_POSITION)
+    val items: Flow<PagingData<MediaItem>> = savedStateHandle.getLiveData<Album>(KEY_FOLDER)
         .asFlow()
-        .flatMapLatest { position ->
+        .flatMapLatest { album: Album? ->
             repository.getItems(
                 PicklePagingSource.SelectionType.IMAGE_AND_VIDEO,
-                null,
-                position,
+                album?.bucketId,
+                PickleConstants.DEFAULT_POSITION,
                 PickleConstants.DEFAULT_PAGE_SIZE
             ).map { pagingData ->
                 pagingData.map { media -> MediaItem(media, this) }
@@ -75,10 +76,12 @@ class PickleSharedViewModel @AssistedInject constructor(
 
     val itemCount = repository.getCount().asLiveData()
 
+    val currentFolder = savedStateHandle.getLiveData<Album>(KEY_FOLDER)
+
     init {
         Timber.d("init = ${this.hashCode()}")
-        if (!savedStateHandle.contains(KEY_SAVED_START_POSITION)) {
-            savedStateHandle.set(KEY_SAVED_START_POSITION, PickleConstants.DEFAULT_POSITION)
+        if (!savedStateHandle.contains(KEY_FOLDER)) {
+            savedStateHandle.set(KEY_FOLDER, null)
         }
     }
 
@@ -120,6 +123,10 @@ class PickleSharedViewModel @AssistedInject constructor(
             Timber.e(e)
             false
         }
+    }
+
+    fun setBucketId(album: Album?) {
+        savedStateHandle.set(KEY_FOLDER, album)
     }
 
     @AssistedInject.Factory
