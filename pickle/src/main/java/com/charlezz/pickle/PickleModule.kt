@@ -5,6 +5,8 @@ import android.content.Context
 import androidx.lifecycle.ViewModelProvider
 import com.charlezz.pickle.fragments.detail.PickleDetailFragment
 import com.charlezz.pickle.fragments.detail.PickleDetailFragmentModule
+import com.charlezz.pickle.fragments.folder.PickleAlbumFragment
+import com.charlezz.pickle.fragments.folder.PickleAlbumFragmentModule
 import com.charlezz.pickle.fragments.main.PickleFragment
 import com.charlezz.pickle.fragments.main.PickleFragmentModule
 import com.charlezz.pickle.util.PickleConstants
@@ -56,4 +58,8 @@ abstract class PickleModule {
     @FragmentScope
     @ContributesAndroidInjector(modules = [PickleDetailFragmentModule::class])
     abstract fun bindsPickleDetailFragment():PickleDetailFragment
+
+    @FragmentScope
+    @ContributesAndroidInjector(modules = [PickleAlbumFragmentModule::class])
+    abstract fun bindsPickleFolderFragment(): PickleAlbumFragment
 }

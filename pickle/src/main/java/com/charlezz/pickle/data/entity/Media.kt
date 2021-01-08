@@ -6,9 +6,10 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class Media(
+data class Media constructor(
     val contentUri: Uri,
     val id: Long,
+    val name: String,
     val relativePath: String?,
     val mediaType: Int,
     val mimeType: String,

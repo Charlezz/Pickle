@@ -64,5 +64,9 @@ object MeasureUtil {
             resources.getDimensionPixelSize(resourceId)
         } else 0
     }
+
+    fun getDimension(context:Context, resId:Int):Float{
+        return context.resources.getDimension(resId)
+    }
 }
 

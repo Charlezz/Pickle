@@ -1,18 +1,25 @@
 package com.charlezz.pickle
 
+import androidx.databinding.BaseObservable
 import androidx.lifecycle.MutableLiveData
+import com.charlezz.pickle.util.lifecycle.SingleLiveEvent
 
-class ToolbarViewModel {
-    var visible = MutableLiveData(true)
+class ToolbarViewModel : BaseObservable() {
+    val visible = MutableLiveData(true)
 
-    var title = MutableLiveData<CharSequence?>("Pickle")
+    val title = MutableLiveData<CharSequence?>("Pickle")
 
-    var subtitle = MutableLiveData<CharSequence>()
+    val subtitle = MutableLiveData<CharSequence>()
 
-    var subtitleVisible = MutableLiveData(true)
+    val subtitleVisible = MutableLiveData(true)
 
-    var marginTop = MutableLiveData(0)
+    val marginTop = MutableLiveData(0)
 
-    var marginIncludeInsets = MutableLiveData(true)
+    val marginIncludeInsets = MutableLiveData(true)
 
+    var titleClickEvent = SingleLiveEvent<Unit>(interval = 300)
+
+    fun onTitleClick() {
+        titleClickEvent.call()
+    }
 }

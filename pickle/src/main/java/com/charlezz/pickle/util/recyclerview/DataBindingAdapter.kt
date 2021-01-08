@@ -7,19 +7,19 @@ import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.RecyclerView
 
-open class DataBindingAdapter<DBA : DataBindingAware> constructor(
+open class DataBindingAdapter<DBA : DataBindingAware, VDB:ViewDataBinding> constructor(
     var dataBindingComponent: DataBindingComponent? = null,
-) : RecyclerView.Adapter<DataBindingHolder<ViewDataBinding>>() {
+) : RecyclerView.Adapter<DataBindingHolder<VDB>>() {
 
     val items: ArrayList<DBA> = ArrayList()
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
-    ): DataBindingHolder<ViewDataBinding> {
+    ): DataBindingHolder<VDB> {
         val layoutInflater = LayoutInflater.from(parent.context)
         val viewDataBinding =
-            DataBindingUtil.inflate<ViewDataBinding>(
+            DataBindingUtil.inflate<VDB>(
                 layoutInflater,
                 viewType,
                 parent,
@@ -33,7 +33,7 @@ open class DataBindingAdapter<DBA : DataBindingAware> constructor(
         return items[position].getLayoutResId()
     }
 
-    override fun onBindViewHolder(holder: DataBindingHolder<ViewDataBinding>, position: Int) {
+    override fun onBindViewHolder(holder: DataBindingHolder<VDB>, position: Int) {
         val item = items[position]
         holder.binding.setVariable(item.getBindingResId(), item)
         holder.binding.executePendingBindings()
