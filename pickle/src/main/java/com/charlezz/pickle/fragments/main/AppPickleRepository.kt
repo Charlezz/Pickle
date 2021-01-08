@@ -1,4 +1,4 @@
-package com.charlezz.pickle.data.repository
+package com.charlezz.pickle.fragments.main
 
 import android.content.Context
 import androidx.paging.Pager
@@ -28,7 +28,7 @@ class AppPickleRepository constructor(
     }
     override fun getItems(
         selectionType: PicklePagingSource.SelectionType,
-        bucketId: Int?,
+        bucketId: Long?,
         startPosition: Int,
         pageSize: Int
     ): Flow<PagingData<Media>>{

@@ -4,21 +4,24 @@ import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Environment
 import android.os.ParcelFileDescriptor
 import android.provider.MediaStore
 import androidx.core.content.FileProvider
-import com.charlezz.pickle.R
-import com.charlezz.pickle.util.ext.showToast
 import timber.log.Timber
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 
-class CameraUtil constructor(val context: Context) {
+class CameraUtil constructor(
+    val context: Context,
+    val envDir: String,
+    val dirToSave: String,
+) {
 
     var currentImagePath: String? = null
 
@@ -29,17 +32,16 @@ class CameraUtil constructor(val context: Context) {
     @SuppressLint("SimpleDateFormat")
     private fun createImageFile(): File {
         val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
-        val dirType = Environment.DIRECTORY_PICTURES
         val storageDir: File = if (DeviceUtil.isAndroid10Later()) {
-            context.getExternalFilesDir(dirType)
-                ?: throw IllegalArgumentException("Can't get External file directory($dirType)")
+            context.getExternalFilesDir(envDir)
+                ?: throw IllegalArgumentException("Can't get External file directory($envDir)")
 
         } else {
-            Environment.getExternalStoragePublicDirectory(dirType)
+            Environment.getExternalStoragePublicDirectory(envDir + File.separator + dirToSave)
         }
 
         return File.createTempFile(
-            "Pickle_${timeStamp}_",
+            "${timeStamp}_",
             ".jpg",
             /* directory */ storageDir
         ).apply {
@@ -48,31 +50,31 @@ class CameraUtil constructor(val context: Context) {
         }
     }
 
-    fun isImageCaptureAvailable(): Boolean {
-        return Intent(MediaStore.ACTION_IMAGE_CAPTURE).resolveActivity(context.packageManager) != null
+    fun hasCamera(): Boolean {
+        return context.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA) &&
+                Intent(MediaStore.ACTION_IMAGE_CAPTURE).resolveActivity(context.packageManager) != null
+        // reference: https://stackoverflow.com/a/37620935
     }
 
-    fun prepareImageCapture(readyToLaunch: (Uri) -> Unit){
-        if (isImageCaptureAvailable()) {
-            val imageFile: File? = try {
-                createImageFile()
-            } catch (e: IOException) {
-                context.showToast(R.string.toast_error_file_create)
-                Timber.w(e)
-                null
-            }
-            imageFile?.let { file ->
-                val imageUri: Uri = FileProvider.getUriForFile(
-                    context,
-                    PickleConstants.getAuthority(context),
-                    file
-                )
-                readyToLaunch.invoke(imageUri)
-            }
+    fun prepareImageCapture(readyToLaunch: (Uri) -> Unit, fallback:(IOException)->Unit) {
+        val imageFile: File? = try {
+            createImageFile()
+        } catch (e: IOException) {
+            fallback.invoke(e)
+            Timber.w(e)
+            null
+        }
+        imageFile?.let { file ->
+            val imageUri: Uri = FileProvider.getUriForFile(
+                context,
+                PickleConstants.getAuthority(context),
+                file
+            )
+            readyToLaunch.invoke(imageUri)
         }
     }
 
-    fun saveImageToMediaStore(callback:()->Unit) {
+    fun saveImageToMediaStore(callback: () -> Unit) {
         currentImagePath?.let { path ->
             val file = File(path)
             if (DeviceUtil.isAndroid10Later()) {
@@ -81,10 +83,7 @@ class CameraUtil constructor(val context: Context) {
                 val contentResolver = context.contentResolver
                 val contentValues = ContentValues().apply {
                     put(MediaStore.Images.Media.DISPLAY_NAME, file.name)
-                    put(
-                        MediaStore.Images.Media.RELATIVE_PATH,
-                        "${Environment.DIRECTORY_PICTURES}/sub"
-                    )
+                    put(MediaStore.Images.Media.RELATIVE_PATH, "$envDir${File.separator}$dirToSave")
                     put(MediaStore.Images.Media.IS_PENDING, 1)
                 }
                 val imageUri: Uri? = contentResolver.insert(contentUri, contentValues)
@@ -103,7 +102,8 @@ class CameraUtil constructor(val context: Context) {
                 }
 
             }
-            MediaScannerConnection.scanFile(context,
+            MediaScannerConnection.scanFile(
+                context,
                 arrayOf(currentImagePath),
                 null
             ) { path, uri ->

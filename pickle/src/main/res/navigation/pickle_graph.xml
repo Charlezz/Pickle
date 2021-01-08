@@ -13,6 +13,9 @@
         <action
             android:id="@+id/action_pickleFragment_to_pickleDetailFragment"
             app:destination="@id/pickleDetailFragment" />
+        <action
+            android:id="@+id/action_pickleFragment_to_pickleFolderFragment"
+            app:destination="@id/pickleFolderFragment" />
     </fragment>
     <fragment
         android:id="@+id/pickleDetailFragment"
@@ -27,4 +30,9 @@
             app:argType="integer"
             android:defaultValue="0" />
     </fragment>
+    <fragment
+        android:id="@+id/pickleFolderFragment"
+        tools:layout="@layout/fragment_pickle_album"
+        android:name="com.charlezz.pickle.fragments.folder.PickleAlbumFragment"
+        android:label="PickleFolderFragment" />
 </navigation>

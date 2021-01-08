@@ -1,4 +1,4 @@
-package com.charlezz.pickle.data.repository
+package com.charlezz.pickle.fragments.main
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -21,7 +21,7 @@ import kotlin.math.max
 @OptIn(ExperimentalCoroutinesApi::class)
 class PicklePagingSource(
     context: Context,
-    bucketId: Int? = null,
+    bucketId: Long? = null,
     selectionType: SelectionType,
     countChannel: ConflatedBroadcastChannel<Int?>
 ) : PagingSource<Int, Media>() {
@@ -29,10 +29,11 @@ class PicklePagingSource(
 
     private val cursor: Cursor?
 
-    private val uri = MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL)
+    private val contentUri = PickleConstants.getContentUri()
 
     private val projection = arrayListOf(
         MediaStore.Files.FileColumns._ID,
+        MediaStore.Files.FileColumns.DISPLAY_NAME,
         MediaStore.Files.FileColumns.MEDIA_TYPE,
         MediaStore.Files.FileColumns.MIME_TYPE,
         MediaStore.Files.FileColumns.DATE_MODIFIED,
@@ -94,7 +95,7 @@ class PicklePagingSource(
         val sortOrder = "${MediaStore.Files.FileColumns.DATE_MODIFIED} desc"
 
         cursor = context.contentResolver.query(
-            uri,
+            contentUri,
             projection,
             selection,
             selectionArgs.toTypedArray(),
@@ -161,8 +162,9 @@ class PicklePagingSource(
                     }
                     mediaList.add(
                         Media(
-                            contentUri = uri,
+                            contentUri = contentUri,
                             id = cursor.getLong(cursor.getColumnIndex(MediaStore.Files.FileColumns._ID)),
+                            name = cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.DISPLAY_NAME)),
                             mediaType = cursor.getInt(cursor.getColumnIndex(MediaStore.Files.FileColumns.MEDIA_TYPE)),
                             mimeType = cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.MIME_TYPE)),
                             dateModified = cursor.getLongOrNull(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATE_MODIFIED)),

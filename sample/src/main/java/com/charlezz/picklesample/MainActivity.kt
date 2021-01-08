@@ -29,13 +29,11 @@ class MainActivity : AppCompatActivity() {
         binding.recyclerView.adapter = adapter
         binding.btn.setOnClickListener {
             launcher.launch(Config.default.apply {
-                title = "PickleSample"
             })
         }
 
         if (savedInstanceState == null) {
             launcher.launch(Config.default.apply {
-                title = "Pickle ${BuildConfig.VERSION_NAME}"
             })
         }
 

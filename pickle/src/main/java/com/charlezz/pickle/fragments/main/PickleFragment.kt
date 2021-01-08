@@ -1,6 +1,7 @@
 package com.charlezz.pickle.fragments.main
 
 import android.Manifest
+import android.app.AlertDialog
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -17,6 +18,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionInflater
+import com.charlezz.pickle.Config
 import com.charlezz.pickle.PickleSharedViewModel
 import com.charlezz.pickle.R
 import com.charlezz.pickle.data.entity.CameraItem
@@ -24,6 +26,7 @@ import com.charlezz.pickle.databinding.FragmentPickleBinding
 import com.charlezz.pickle.util.DeviceUtil
 import com.charlezz.pickle.util.MeasureUtil
 import com.charlezz.pickle.util.dagger.SharedViewModelProvider
+import com.charlezz.pickle.util.ext.showToast
 import com.charlezz.pickle.util.recyclerview.GridSpaceDecoration
 import dagger.android.support.DaggerFragment
 import kotlinx.coroutines.flow.collectLatest
@@ -34,12 +37,9 @@ import javax.inject.Provider
 import kotlin.math.max
 
 
-class PickleFragment constructor(
-
-) : DaggerFragment(),
+class PickleFragment : DaggerFragment(),
     CameraItem.OnItemClickListener,
-        PickleItemAdapter.OnImageListener
-{
+    PickleItemAdapter.OnImageListener {
 
 
     @Inject
@@ -57,6 +57,9 @@ class PickleFragment constructor(
 
     @Inject
     lateinit var gridSpaceDecoration: GridSpaceDecoration
+
+    @Inject
+    lateinit var config: Config
 
     private lateinit var sharedViewModel: PickleSharedViewModel
 
@@ -110,15 +113,17 @@ class PickleFragment constructor(
     ): View {
         binding = FragmentPickleBinding.inflate(inflater, container, false)
         prepareTransitions()
-        if(savedInstanceState == null && DeviceUtil.isAndroid5Later()){
-            postponeEnterTransition()
-        }
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Timber.d("onViewCreated")
+        sharedViewModel.toolbarViewModel.apply {
+            titleClickEvent.observe(viewLifecycleOwner){
+                findNavController().navigate(PickleFragmentDirections.actionPickleFragmentToPickleFolderFragment())
+            }
+        }
         scrollToPosition()
         requireActivity().onBackPressedDispatcher.addCallback(
             viewLifecycleOwner,
@@ -129,7 +134,6 @@ class PickleFragment constructor(
             })
 
         binding.lifecycleOwner = viewLifecycleOwner
-        binding.recyclerView.adapter = adapters.concatedAdapter
         adapters.itemAdapter.onImageListener = this
         binding.recyclerView.layoutManager = gridLayoutManager.get()
         binding.recyclerView.addItemDecoration(gridSpaceDecoration)
@@ -151,6 +155,9 @@ class PickleFragment constructor(
                     )
 
                 if (DeviceUtil.isAndroid5Later()) {
+                    if (savedInstanceState == null) {
+                        postponeEnterTransition()
+                    }
                     findNavController().navigate(
                         navDirection,
                         FragmentNavigatorExtras(view to view.transitionName)
@@ -167,6 +174,17 @@ class PickleFragment constructor(
                     R.plurals.numberOfMedia, count, count
                 )
             }
+        }
+
+        sharedViewModel.currentFolder.observe(viewLifecycleOwner) { folder ->
+            sharedViewModel.toolbarViewModel.title.value =
+                (folder?.name ?: requireContext().getString(R.string.recent)) + " ▾"
+            if (folder?.bucketId == null && sharedViewModel.cameraUtil.hasCamera()) {
+                binding.recyclerView.adapter = adapters.concatedAdapter
+            } else {
+                binding.recyclerView.adapter = adapters.itemAdapter
+            }
+
         }
     }
 
@@ -199,17 +217,26 @@ class PickleFragment constructor(
     }
 
     private fun prepareImageCapture() {
-        sharedViewModel.cameraUtil.prepareImageCapture { uri ->
-            takePictureLauncher.launch(uri)
-        }
+        sharedViewModel.cameraUtil.prepareImageCapture(
+            readyToLaunch = { uri -> takePictureLauncher.launch(uri) },
+            fallback = { showToast(R.string.toast_error_file_create) }
+        )
     }
 
     fun onBackPressed() {
-        requireActivity().finish()
+        if (sharedViewModel.selection.isEmpty()) {
+            requireActivity().finish()
+        } else {
+            AlertDialog.Builder(requireContext())
+                .setMessage(R.string.are_you_sure_to_exit)
+                .setPositiveButton(R.string.confirm) { _, _ -> requireActivity().finish() }
+                .setNegativeButton(R.string.cancel) { _, _ -> }
+                .show()
+        }
     }
 
     private fun prepareTransitions() {
-        if(DeviceUtil.isAndroid5Later()){
+        if (DeviceUtil.isAndroid5Later()) {
             exitTransition = TransitionInflater.from(context)
                 .inflateTransition(R.transition.grid_exit_transition)
             setExitSharedElementCallback(
@@ -229,7 +256,7 @@ class PickleFragment constructor(
         }
     }
 
-    private fun scrollToPosition(){
+    private fun scrollToPosition() {
         binding.recyclerView.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
             override fun onLayoutChange(
                 v: View,
@@ -245,9 +272,15 @@ class PickleFragment constructor(
                 binding.recyclerView.removeOnLayoutChangeListener(this)
                 val layoutManager = binding.recyclerView.layoutManager
                 layoutManager?.let {
-                    val currentPosition = sharedViewModel.bindingItemAdapterPosition.get()+adapters.getHeaderItemCount()
+                    val currentPosition =
+                        sharedViewModel.bindingItemAdapterPosition.get() + adapters.getHeaderItemCount()
                     val viewAtPosition = layoutManager.findViewByPosition(currentPosition)
-                    if (viewAtPosition == null || layoutManager.isViewPartiallyVisible(viewAtPosition, false, true)) {
+                    if (viewAtPosition == null || layoutManager.isViewPartiallyVisible(
+                            viewAtPosition,
+                            false,
+                            true
+                        )
+                    ) {
                         binding.recyclerView.post { layoutManager.scrollToPosition(currentPosition) }
                     }
                 }
@@ -257,8 +290,8 @@ class PickleFragment constructor(
     }
 
     override fun onLoaded(position: Int) {
-        if(DeviceUtil.isAndroid5Later()){
-            if(sharedViewModel.bindingItemAdapterPosition.get() != position){
+        if (DeviceUtil.isAndroid5Later()) {
+            if (sharedViewModel.bindingItemAdapterPosition.get() != position) {
                 return
             }
             startPostponedEnterTransition()
