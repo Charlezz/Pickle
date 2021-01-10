@@ -52,8 +52,8 @@ class PickleActivity : AppCompatActivity(), HasAndroidInjector {
         DataBindingUtil.setContentView(this, R.layout.activity_pickle)
     }
 
-    private val navHostFragment: NavHostFragment by lazy {
-        NavHostFragment.create(R.navigation.pickle_graph)
+    private val navHostFragment: NavHostFragment by lazy{
+        supportFragmentManager.primaryNavigationFragment as NavHostFragment
     }
 
     private lateinit var sharedViewModel: PickleSharedViewModel
@@ -74,7 +74,6 @@ class PickleActivity : AppCompatActivity(), HasAndroidInjector {
 
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (isGranted) {
-                setupNavigationComponent()
                 setupViewModel()
                 setupSystemUI()
                 pickleContentObserver.getContentChangedEvent().observe(this) {
@@ -86,14 +85,6 @@ class PickleActivity : AppCompatActivity(), HasAndroidInjector {
                 finish()
             }
         }.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
-    }
-
-    private fun setupNavigationComponent() {
-        Timber.d("setup")
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragmentContainerView, navHostFragment)
-            .setPrimaryNavigationFragment(navHostFragment)
-            .commitNow()
     }
 
     private fun setupViewModel() {
@@ -114,8 +105,7 @@ class PickleActivity : AppCompatActivity(), HasAndroidInjector {
             DeviceUtil.isAndroid5Later() -> {
                 window.statusBarColor = Color.TRANSPARENT
                 window.navigationBarColor = Color.TRANSPARENT
-                binding.rootLayout.systemUiVisibility =
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
             }
             else -> {
                 val constraintSet = ConstraintSet()

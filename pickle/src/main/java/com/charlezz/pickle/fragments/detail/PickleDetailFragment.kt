@@ -139,7 +139,6 @@ class PickleDetailFragment : DaggerFragment(), PickleDetailAdapter.OnImageListen
                     sharedViewModel.toolbarViewModel.subtitle.value =
                         "${currentPosition + 1} / ${sharedViewModel.itemCount.value}"
                 }
-
             }
         }
 
@@ -220,6 +219,12 @@ class PickleDetailFragment : DaggerFragment(), PickleDetailAdapter.OnImageListen
                     }
                 })
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        val currentPosition = (binding.recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+        sharedViewModel.bindingItemAdapterPosition.set(currentPosition)
     }
 
     override fun onLoaded(position: Int) {
