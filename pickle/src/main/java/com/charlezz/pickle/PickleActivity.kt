@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.WindowInsets
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
@@ -96,11 +95,11 @@ class PickleActivity : AppCompatActivity(), HasAndroidInjector {
     private fun setupSystemUI() {
         Timber.d("setupStatusBar")
         when {
+
             DeviceUtil.isAndroid11Later() -> {
                 window.statusBarColor = Color.TRANSPARENT
                 window.navigationBarColor = Color.TRANSPARENT
                 window.setDecorFitsSystemWindows(false)
-                window.insetsController?.show(WindowInsets.Type.systemBars())
             }
             DeviceUtil.isAndroid5Later() -> {
                 window.statusBarColor = Color.TRANSPARENT

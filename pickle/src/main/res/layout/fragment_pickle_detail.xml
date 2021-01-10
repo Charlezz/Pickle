@@ -16,28 +16,17 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/top_guideline"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:orientation="horizontal"
-            app:constraintGuide_begin="@{viewModel.guideTopMargin}"
-            app:layout_constraintGuide_begin="0dp"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_view"
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            tools:listitem="@layout/view_pickle_media_detail"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:window_includeInsets="@{false}"
-            app:window_marginTop="@{0}" />
+            app:window_marginTop="@{0}"
+            tools:listitem="@layout/view_pickle_media_detail" />
 
         <ImageView
             android:id="@+id/checked"
@@ -49,20 +38,11 @@
             android:padding="10dp"
             android:src="@{viewModel.isChecked()?@drawable/check_circle_on:@drawable/check_circle_off}"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="@id/top_guideline"
-            app:visible="@{viewModel.checkBoxVisible}"
+            app:layout_constraintTop_toTopOf="parent"
+            app:window_includeInsets="@{true}"
+            app:window_marginTop="@{MeasureUtil.INSTANCE.getToolBarHeight(context)}"
             tools:src="@drawable/check_circle_on"
             tools:visibility="visible" />
-
-        <ImageView
-            android:id="@+id/dummy"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

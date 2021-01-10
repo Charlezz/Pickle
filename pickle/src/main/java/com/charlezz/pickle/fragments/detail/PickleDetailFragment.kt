@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.core.app.SharedElementCallback
-import androidx.core.view.ViewCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -18,7 +17,6 @@ import com.charlezz.pickle.PickleSharedViewModel
 import com.charlezz.pickle.R
 import com.charlezz.pickle.databinding.FragmentPickleDetailBinding
 import com.charlezz.pickle.util.DeviceUtil
-import com.charlezz.pickle.util.MeasureUtil
 import com.charlezz.pickle.util.dagger.SharedViewModelProvider
 import dagger.android.support.DaggerFragment
 import kotlinx.coroutines.flow.collectLatest
@@ -108,15 +106,33 @@ class PickleDetailFragment : DaggerFragment(), PickleDetailAdapter.OnImageListen
             } ?: Timber.d("No Item")
         }
 
-        if (DeviceUtil.isAndroid5Later()) {
-            ViewCompat.setOnApplyWindowInsetsListener(binding.checked) { v, insets ->
-                viewModel.guideTopMargin.value =
-                    insets.systemWindowInsetTop + MeasureUtil.getToolBarHeight(v.context)
-                insets
-            }
-        } else {
-            viewModel.guideTopMargin.value =
-                MeasureUtil.dpToPx(requireContext(), DEFAULT_CHECK_BOX_TOP_MARGIN)
+        when {
+//            DeviceUtil.isAndroid11Later() -> {
+//                binding.checked.setOnApplyWindowInsetsListener { v, insets ->
+//                    binding.checked.rootWindowInsets.getInsets(WindowInsets.Type.systemBars())
+//                    val insets = view.rootWindowInsets.getInsets(WindowInsets.Type.systemBars())
+//                    binding.checked.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+//                        updateMargins(
+//                            insets.left,
+//                            insets.top,
+//                            insets.right,
+//                            insets.bottom
+//                        )
+//                    }
+//                    WindowInsets.Builder().setInsets(WindowInsets.Type.systemBars(), insets).build()
+//                }
+//            }
+//            DeviceUtil.isAndroid5Later() -> {
+//                ViewCompat.setOnApplyWindowInsetsListener(binding.checked) { v, insets ->
+//                    viewModel.guideTopMargin.value =
+//                        insets.systemWindowInsetTop + MeasureUtil.getToolBarHeight(v.context)
+//                    insets
+//                }
+//            }
+//            else -> {
+//                viewModel.guideTopMargin.value =
+//                    MeasureUtil.dpToPx(requireContext(), DEFAULT_CHECK_BOX_TOP_MARGIN)
+//            }
         }
 
         requireActivity().onBackPressedDispatcher.addCallback(
@@ -223,7 +239,8 @@ class PickleDetailFragment : DaggerFragment(), PickleDetailAdapter.OnImageListen
 
     override fun onDestroyView() {
         super.onDestroyView()
-        val currentPosition = (binding.recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+        val currentPosition =
+            (binding.recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
         sharedViewModel.bindingItemAdapterPosition.set(currentPosition)
     }
 
