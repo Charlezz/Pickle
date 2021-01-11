@@ -13,6 +13,7 @@
     <application android:requestLegacyExternalStorage="true">
         <activity
             android:name=".PickleActivity"
+            android:configChanges="orientation"
             android:theme="@style/PickleTheme" />
         <provider
             android:name="androidx.core.content.FileProvider"
