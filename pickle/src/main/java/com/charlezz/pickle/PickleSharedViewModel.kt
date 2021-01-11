@@ -78,6 +78,8 @@ class PickleSharedViewModel @AssistedInject constructor(
 
     val currentFolder = savedStateHandle.getLiveData<Album>(KEY_FOLDER)
 
+    val currentDestinationId = SingleLiveEvent<Int>()
+
     init {
         Timber.d("init = ${this.hashCode()}")
         if (!savedStateHandle.contains(KEY_FOLDER)) {

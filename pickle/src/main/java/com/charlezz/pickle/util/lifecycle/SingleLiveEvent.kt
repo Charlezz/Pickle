@@ -17,6 +17,10 @@ class SingleLiveEvent<T> constructor(private val interval: Long = NO_INTERVAL) :
     private var lastClickTime: Long = 0
     private val mPending = AtomicBoolean(false)
 
+    fun invalidate():SingleLiveEvent<T>{
+        mPending.set(false)
+        return this
+    }
     @MainThread
     override fun observe(owner: LifecycleOwner, observer: Observer<in T?>) {
         super.observe(owner, { t ->

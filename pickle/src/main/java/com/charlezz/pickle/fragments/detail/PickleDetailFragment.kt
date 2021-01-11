@@ -106,35 +106,6 @@ class PickleDetailFragment : DaggerFragment(), PickleDetailAdapter.OnImageListen
             } ?: Timber.d("No Item")
         }
 
-        when {
-//            DeviceUtil.isAndroid11Later() -> {
-//                binding.checked.setOnApplyWindowInsetsListener { v, insets ->
-//                    binding.checked.rootWindowInsets.getInsets(WindowInsets.Type.systemBars())
-//                    val insets = view.rootWindowInsets.getInsets(WindowInsets.Type.systemBars())
-//                    binding.checked.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-//                        updateMargins(
-//                            insets.left,
-//                            insets.top,
-//                            insets.right,
-//                            insets.bottom
-//                        )
-//                    }
-//                    WindowInsets.Builder().setInsets(WindowInsets.Type.systemBars(), insets).build()
-//                }
-//            }
-//            DeviceUtil.isAndroid5Later() -> {
-//                ViewCompat.setOnApplyWindowInsetsListener(binding.checked) { v, insets ->
-//                    viewModel.guideTopMargin.value =
-//                        insets.systemWindowInsetTop + MeasureUtil.getToolBarHeight(v.context)
-//                    insets
-//                }
-//            }
-//            else -> {
-//                viewModel.guideTopMargin.value =
-//                    MeasureUtil.dpToPx(requireContext(), DEFAULT_CHECK_BOX_TOP_MARGIN)
-//            }
-        }
-
         requireActivity().onBackPressedDispatcher.addCallback(
             viewLifecycleOwner,
             onBackPressedCallback
@@ -218,7 +189,6 @@ class PickleDetailFragment : DaggerFragment(), PickleDetailAdapter.OnImageListen
                 .inflateTransition(R.transition.image_shared_element_transition)
             sharedElementEnterTransition = transition
 
-            // A similar mapping is set at the GridFragment with a setExitSharedElementCallback.
             setEnterSharedElementCallback(
                 object : SharedElementCallback() {
                     override fun onMapSharedElements(
@@ -229,7 +199,6 @@ class PickleDetailFragment : DaggerFragment(), PickleDetailAdapter.OnImageListen
                             binding.recyclerView.findViewHolderForAdapterPosition(sharedViewModel.bindingItemAdapterPosition.get())
                                 ?: return
 
-                        // Map the first shared element name to the child ImageView.
                         sharedElements[names[0]] =
                             selectedViewHolder.itemView.findViewById(R.id.image)
                     }
@@ -251,6 +220,7 @@ class PickleDetailFragment : DaggerFragment(), PickleDetailAdapter.OnImageListen
             }
 
             startPostponedEnterTransition()
+            sharedViewModel.currentDestinationId.value = R.id.pickleDetailFragment
         }
     }
 

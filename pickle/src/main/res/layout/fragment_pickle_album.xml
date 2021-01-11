@@ -20,9 +20,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:window_includeInsets="@{true}"
-            app:window_marginBottom="@{0}"
-            app:window_marginTop="@{MeasureUtil.INSTANCE.getToolBarHeight(context)}"
             tools:listitem="@layout/view_pickle_album" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

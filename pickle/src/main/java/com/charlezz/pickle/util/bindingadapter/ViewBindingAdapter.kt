@@ -1,14 +1,13 @@
 package com.charlezz.pickle.util.bindingadapter
 
+import android.view.Surface
 import android.view.View
-import android.view.ViewGroup
-import android.view.WindowInsets
 import androidx.core.view.ViewCompat
-import androidx.core.view.updateLayoutParams
-import androidx.core.view.updateMargins
 import androidx.databinding.BindingAdapter
 import com.charlezz.pickle.util.DeviceUtil
 import com.charlezz.pickle.util.ext.setMarginBottom
+import com.charlezz.pickle.util.ext.setMarginLeft
+import com.charlezz.pickle.util.ext.setMarginRight
 import com.charlezz.pickle.util.ext.setMarginTop
 
 @BindingAdapter(value = ["layout_width", "layout_height"], requireAll = false)
@@ -40,40 +39,32 @@ fun setMargin(
     marginBottom: Int,
     include: Boolean
 ) {
+    ViewCompat.setOnApplyWindowInsetsListener(view) { view, insets ->
+        if (include) {
+            view.setMarginTop(insets.systemWindowInsetTop + marginTop)
+            view.setMarginBottom(insets.systemWindowInsetBottom + marginBottom)
+        } else {
+            view.setMarginTop(marginTop)
+            view.setMarginBottom(marginBottom)
+        }
 
-    if (DeviceUtil.isAndroid11Later()) {
-        view.setOnApplyWindowInsetsListener { v, insets ->
-            val insets = view.rootWindowInsets.getInsets(WindowInsets.Type.systemBars())
-            view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                if (include) {
-                    updateMargins(
-                        insets.left,
-                        insets.top + marginTop,
-                        insets.right,
-                        insets.bottom + marginBottom
-                    )
-                } else {
-                    updateMargins(
-                        insets.left,
-                        marginTop,
-                        insets.right,
-                        marginBottom
-                    )
+        if(DeviceUtil.isAndroid5Later()){
+            when (view.display.rotation) {
+                Surface.ROTATION_90 -> {
+                    view.setMarginLeft(0)
+                    view.setMarginRight(insets.systemWindowInsetRight)
+                }
+                Surface.ROTATION_270 -> {
+                    view.setMarginLeft(insets.systemWindowInsetLeft)
+                    view.setMarginRight(0)
+                }
+                else -> {
+                    view.setMarginRight(insets.systemWindowInsetRight)
+                    view.setMarginLeft(insets.systemWindowInsetLeft)
                 }
             }
-            WindowInsets.Builder().setInsets(WindowInsets.Type.systemBars(), insets).build()
         }
-    } else {
-        ViewCompat.setOnApplyWindowInsetsListener(view) { view, insets ->
-            if (include) {
-                view.setMarginTop(insets.systemWindowInsetTop + marginTop)
-                view.setMarginBottom(insets.systemWindowInsetBottom + marginBottom)
-            } else {
-                view.setMarginTop(marginTop)
-                view.setMarginBottom(marginBottom)
-            }
-            insets
-        }
+        insets
     }
 
 

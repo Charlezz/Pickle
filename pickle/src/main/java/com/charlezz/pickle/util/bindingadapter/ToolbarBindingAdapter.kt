@@ -27,7 +27,13 @@ fun setSubtitle(toolbar: Toolbar, subtitle: CharSequence?, visible: Boolean?) {
 @BindingAdapter("toolbar_onTitleClick")
 fun setOnToolbarTitleClickListener(toolbar: Toolbar, listener: View.OnClickListener?) {
     val tv = getTextView(toolbar, "mTitleTextView")
-    toolbar.setOnClickListener(listener)
+    tv?.setOnClickListener(listener)
+}
+
+@BindingAdapter("toolbar_onTitleLongClick")
+fun setOnToolbarTitleLongClickListener(toolbar: Toolbar, listener: View.OnLongClickListener?) {
+    val tv = getTextView(toolbar, "mTitleTextView")
+    tv?.setOnLongClickListener(listener)
 }
 
 private fun getTextView(toolbar: Toolbar, fieldName: String): TextView? {

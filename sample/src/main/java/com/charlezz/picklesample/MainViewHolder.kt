@@ -8,7 +8,6 @@ import com.charlezz.pickle.data.entity.getUri
 import com.charlezz.picklesample.databinding.ItemViewBinding
 
 class MainViewHolder(private val binding: ItemViewBinding) : RecyclerView.ViewHolder(binding.root) {
-
     fun setImage(media: Media) {
         Glide.with(binding.imageView).load(media.getUri()).into(binding.imageView)
 

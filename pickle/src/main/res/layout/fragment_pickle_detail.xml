@@ -24,8 +24,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:window_includeInsets="@{false}"
-            app:window_marginTop="@{0}"
             tools:listitem="@layout/view_pickle_media_detail" />
 
         <ImageView
