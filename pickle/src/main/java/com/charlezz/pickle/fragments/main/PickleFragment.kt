@@ -119,8 +119,9 @@ class PickleFragment : DaggerFragment(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Timber.d("onViewCreated")
+        sharedViewModel.currentDestinationId.value = R.id.pickleFragment
         sharedViewModel.toolbarViewModel.apply {
-            titleClickEvent.observe(viewLifecycleOwner){
+            titleClickEvent.invalidate().observe(viewLifecycleOwner) {
                 findNavController().navigate(PickleFragmentDirections.actionPickleFragmentToPickleFolderFragment())
             }
         }
@@ -184,8 +185,12 @@ class PickleFragment : DaggerFragment(),
             } else {
                 binding.recyclerView.adapter = adapters.itemAdapter
             }
-
         }
+
+        sharedViewModel.toolbarViewModel.titleLongClickEvent.observe(viewLifecycleOwner) {
+            binding.recyclerView.layoutManager?.scrollToPosition((sharedViewModel.itemCount.value?: 1) - 1)
+        }
+
     }
 
     private fun onSpanCountChanged(count: Int) {
@@ -296,5 +301,10 @@ class PickleFragment : DaggerFragment(),
             }
             startPostponedEnterTransition()
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        sharedViewModel.toolbarViewModel.titleClickEvent
     }
 }

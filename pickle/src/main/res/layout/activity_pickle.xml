@@ -13,21 +13,19 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/root_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-<!--        android:fitsSystemWindows="true"-->
-
+        android:layout_height="match_parent"
+        >
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/fragmentContainerView"
+            android:name="androidx.navigation.fragment.NavHostFragment"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            app:defaultNavHost="true"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:name="androidx.navigation.fragment.NavHostFragment"
-            app:defaultNavHost="true"
-            app:navGraph="@navigation/pickle_graph"
-            />
+            app:navGraph="@navigation/pickle_graph" />
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/tool_bar"
@@ -36,12 +34,12 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:toolbar_onTitleClick="@{v->toolbarViewModel.onTitleClick()}"
+            app:toolbar_onTitleLongClick="@{v->toolbarViewModel.onTitleLongClick()}"
             app:toolbar_subtitle="@{toolbarViewModel.subtitle}"
             app:toolbar_subtitle_visible="@{toolbarViewModel.subtitleVisible}"
             app:toolbar_title="@{toolbarViewModel.title}"
-            app:toolbar_onTitleClick="@{v->toolbarViewModel.onTitleClick()}"
-            app:visible="@{toolbarViewModel.visible}"
-            app:window_includeInsets="@{toolbarViewModel.marginIncludeInsets}"
-            app:window_marginTop="@{toolbarViewModel.marginTop}" />
+            app:visible="@{toolbarViewModel.visible}" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -29,5 +29,6 @@
     <color name="light_white">#80ffffff</color>
     <color name="white">#ffffff</color>
     <color name="black">#000000</color>
+    <color name="black_50">#7F000000</color>
 
 </resources>

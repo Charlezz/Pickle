@@ -3,20 +3,18 @@ package com.charlezz.pickle
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Color
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintSet
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment
 import com.charlezz.pickle.data.PickleContentObserver
 import com.charlezz.pickle.databinding.ActivityPickleBinding
-import com.charlezz.pickle.util.DeviceUtil
+import com.charlezz.pickle.util.SystemUIController
 import com.charlezz.pickle.util.dagger.SharedViewModelProvider
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
@@ -47,11 +45,13 @@ class PickleActivity : AppCompatActivity(), HasAndroidInjector {
     @Inject
     lateinit var config: Config
 
-    private val binding: ActivityPickleBinding by lazy {
+    private val systemUIController: SystemUIController by lazy{ SystemUIController(this) }
+
+    val binding: ActivityPickleBinding by lazy {
         DataBindingUtil.setContentView(this, R.layout.activity_pickle)
     }
 
-    private val navHostFragment: NavHostFragment by lazy{
+    private val navHostFragment: NavHostFragment by lazy {
         supportFragmentManager.primaryNavigationFragment as NavHostFragment
     }
 
@@ -78,12 +78,15 @@ class PickleActivity : AppCompatActivity(), HasAndroidInjector {
                 pickleContentObserver.getContentChangedEvent().observe(this) {
                     sharedViewModel.repository.invalidate()
                 }
-                navHostFragment.navController.addOnDestinationChangedListener { controller, destination, arguments -> invalidateOptionsMenu() }
+                navHostFragment.navController.addOnDestinationChangedListener { controller, destination, arguments ->
+                    invalidateOptionsMenu()
+                }
                 sharedViewModel.selection.getCount().observe(this) { invalidateOptionsMenu() }
             } else {
                 finish()
             }
         }.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+
     }
 
     private fun setupViewModel() {
@@ -94,28 +97,15 @@ class PickleActivity : AppCompatActivity(), HasAndroidInjector {
 
     private fun setupSystemUI() {
         Timber.d("setupStatusBar")
-        when {
+        sharedViewModel.currentDestinationId.observe(this) { destinationId ->
+            when (navHostFragment.navController.currentDestination?.id) {
+                R.id.pickleDetailFragment -> {
+                    systemUIController.updateUI(true)
+                }
+                else -> {
+                    systemUIController.updateUI(false)
 
-            DeviceUtil.isAndroid11Later() -> {
-                window.statusBarColor = Color.TRANSPARENT
-                window.navigationBarColor = Color.TRANSPARENT
-                window.setDecorFitsSystemWindows(false)
-            }
-            DeviceUtil.isAndroid5Later() -> {
-                window.statusBarColor = Color.TRANSPARENT
-                window.navigationBarColor = Color.TRANSPARENT
-                window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-            }
-            else -> {
-                val constraintSet = ConstraintSet()
-                constraintSet.clone(binding.rootLayout)
-                constraintSet.connect(
-                    binding.fragmentContainerView.id, ConstraintSet.TOP,
-                    binding.toolBar.id, ConstraintSet.BOTTOM
-                )
-                binding.fragmentContainerView
-                constraintSet.applyTo(binding.rootLayout)
-
+                }
             }
         }
     }
@@ -171,4 +161,8 @@ class PickleActivity : AppCompatActivity(), HasAndroidInjector {
         return androidInjector
     }
 
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        Timber.e("onConfigurationChanged")
+    }
 }

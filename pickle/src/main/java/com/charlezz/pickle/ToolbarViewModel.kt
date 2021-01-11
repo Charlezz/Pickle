@@ -19,7 +19,14 @@ class ToolbarViewModel : BaseObservable() {
 
     var titleClickEvent = SingleLiveEvent<Unit>(interval = 300)
 
+    var titleLongClickEvent = SingleLiveEvent<Unit>(interval = 300)
+
     fun onTitleClick() {
         titleClickEvent.call()
+    }
+
+    fun onTitleLongClick():Boolean{
+        titleLongClickEvent.call()
+        return true
     }
 }
