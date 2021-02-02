@@ -7,6 +7,7 @@
     <string name="desc_check_box">CheckBox</string>
     <string name="desc_camera">Camera</string>
     <string name="desc_thumbnail">Thumbnail</string>
+    <string name="attach">Attach</string>
     <string name="folder">Folder</string>
     <string name="recent">Recent</string>
     <string name="are_you_sure_to_exit">Are you sure to exit?</string>

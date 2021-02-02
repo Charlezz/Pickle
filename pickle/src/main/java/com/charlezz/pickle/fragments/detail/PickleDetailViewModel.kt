@@ -16,14 +16,19 @@ class PickleDetailViewModel @AssistedInject constructor(
     @Assisted private val savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(app) {
 
-    var checkBoxEnabled = MutableLiveData(true)
+    val checkBoxEnabled = MutableLiveData(true)
     val isChecked = MutableLiveData<Boolean>()
     var currentMediaItem: MediaItem? = null
     val checkBoxClickEvent = SingleLiveEvent<MediaItem?>()
+    val fullScreen = MutableLiveData<Boolean>(false)
 
     fun onCheckBoxClick() {
         Timber.d("onCheckBoxClick")
         checkBoxClickEvent.value = currentMediaItem
+    }
+
+    fun crossfade() {
+        fullScreen.value = !(fullScreen.value ?: true)
     }
 
     @AssistedInject.Factory

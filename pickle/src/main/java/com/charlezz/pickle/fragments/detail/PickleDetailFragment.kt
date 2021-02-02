@@ -1,11 +1,14 @@
 package com.charlezz.pickle.fragments.detail
 
+import android.graphics.Color
+import android.graphics.Matrix
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.activity.OnBackPressedCallback
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.SharedElementCallback
+import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -13,22 +16,28 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionInflater
+import com.charlezz.pickle.OnImageAppearedListener
 import com.charlezz.pickle.PickleSharedViewModel
 import com.charlezz.pickle.R
+import com.charlezz.pickle.data.entity.SystemUIType
 import com.charlezz.pickle.databinding.FragmentPickleDetailBinding
+import com.charlezz.pickle.uimodel.OptionMenuViewModel
+import com.charlezz.pickle.uimodel.ToolbarViewModel
 import com.charlezz.pickle.util.DeviceUtil
 import com.charlezz.pickle.util.dagger.SharedViewModelProvider
+import com.charlezz.pickle.util.ext.setMarginBottom
+import com.charlezz.pickle.util.ext.setMarginLeft
+import com.charlezz.pickle.util.ext.setMarginRight
+import com.charlezz.pickle.util.ext.setMarginTop
+import com.charlezz.pickle.util.lifecycle.SingleLiveEvent
+import com.github.chrisbanes.photoview.PhotoView
 import dagger.android.support.DaggerFragment
 import kotlinx.coroutines.flow.collectLatest
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Provider
 
-class PickleDetailFragment : DaggerFragment(), PickleDetailAdapter.OnImageListener {
-
-    companion object {
-        const val DEFAULT_CHECK_BOX_TOP_MARGIN = 10f
-    }
+class PickleDetailFragment : DaggerFragment(), OnImageAppearedListener {
 
     @Inject
     @SharedViewModelProvider
@@ -46,7 +55,18 @@ class PickleDetailFragment : DaggerFragment(), PickleDetailAdapter.OnImageListen
     @Inject
     lateinit var pagerSnapHelper: PagerSnapHelper
 
-    private lateinit var binding: FragmentPickleDetailBinding
+    @Inject
+    lateinit var toolbarViewModel: ToolbarViewModel
+
+    @Inject
+    lateinit var systemUIEvent: SingleLiveEvent<SystemUIType>
+
+    @Inject
+    lateinit var optionMenuViewModel: OptionMenuViewModel
+
+    private val binding get() = _binding!!
+
+    private var _binding: FragmentPickleDetailBinding? = null
 
     private lateinit var sharedViewModel: PickleSharedViewModel
 
@@ -54,6 +74,7 @@ class PickleDetailFragment : DaggerFragment(), PickleDetailAdapter.OnImageListen
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
         this.sharedViewModel = sharedViewModelProvider.get(PickleSharedViewModel::class.java)
         this.viewModel = viewModelProvider.get(PickleDetailViewModel::class.java)
 
@@ -64,8 +85,20 @@ class PickleDetailFragment : DaggerFragment(), PickleDetailAdapter.OnImageListen
         }
 
         if (DeviceUtil.isAndroid5Later()) {
-            sharedElementEnterTransition = TransitionInflater.from(context)
-                .inflateTransition(android.R.transition.move)
+            prepareSharedElementTransition()
+            if (savedInstanceState == null) {
+                postponeEnterTransition()
+            }
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        optionMenuViewModel.onCreateOptionMenu(menu)
+        optionMenuViewModel.apply {
+            menuTitle = getString(R.string.done)
+            setTitleTextColor(ContextCompat.getColor(context, R.color.point_color))
+            setDisableTitleTextColor(Color.parseColor("#ffffff"))
         }
     }
 
@@ -74,13 +107,11 @@ class PickleDetailFragment : DaggerFragment(), PickleDetailAdapter.OnImageListen
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentPickleDetailBinding.inflate(inflater, container, false)
+        _binding = FragmentPickleDetailBinding.inflate(inflater, container, false)
+        (requireActivity() as AppCompatActivity).setSupportActionBar(binding.toolbarBinding.toolbar)
 
-        binding.recyclerView
-        prepareSharedElementTransition()
-        if (savedInstanceState == null && DeviceUtil.isAndroid5Later()) {
-            postponeEnterTransition()
-        }
+//        prepareSharedElementTransition()
+
 
         return binding.root
     }
@@ -89,12 +120,13 @@ class PickleDetailFragment : DaggerFragment(), PickleDetailAdapter.OnImageListen
         super.onViewCreated(view, savedInstanceState)
         Timber.d("onViewCreated")
         scrollToPosition()
+        binding.toolbarViewModel = toolbarViewModel
         binding.lifecycleOwner = viewLifecycleOwner
         binding.viewModel = viewModel
 
         binding.recyclerView.setHasFixedSize(true)
         binding.recyclerView.adapter = adapter
-        adapter.onImageListener = this
+        adapter.onImageAppearedListener = this
         binding.recyclerView.layoutManager = linearLayoutManager.get()
         binding.recyclerView.addOnScrollListener(onScrollListener)
         pagerSnapHelper.attachToRecyclerView(binding.recyclerView)
@@ -111,6 +143,58 @@ class PickleDetailFragment : DaggerFragment(), PickleDetailAdapter.OnImageListen
             onBackPressedCallback
         )
 
+        //safe area
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.safeArea) { _, insets ->
+            binding.safeArea.setMarginTop(0)
+            binding.safeArea.setMarginBottom(insets.systemWindowInsetBottom)
+            binding.safeArea.setMarginLeft(insets.systemWindowInsetLeft)
+            binding.safeArea.setMarginRight(insets.systemWindowInsetRight)
+            insets
+        }
+
+        sharedViewModel.itemClickEvent.observe(viewLifecycleOwner) {
+            viewModel.crossfade()
+            /**
+             * PhotoView 라이브러리가 onLayout() 호출시 Matrix 상태를 보존하지 않으므로
+             * 직접 저장/복원 한다.
+             */
+            val photoView: PhotoView? = it?.first as PhotoView?
+            val matrix = Matrix()
+            photoView?.attacher?.getSuppMatrix(matrix)
+            photoView?.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
+                override fun onLayoutChange(
+                    v: View?,
+                    left: Int,
+                    top: Int,
+                    right: Int,
+                    bottom: Int,
+                    oldLeft: Int,
+                    oldTop: Int,
+                    oldRight: Int,
+                    oldBottom: Int
+                ) {
+                    photoView.attacher?.setDisplayMatrix(matrix)
+                    photoView.removeOnLayoutChangeListener(this)
+                }
+            })
+
+            /**
+             * decorView를 수정하면, 하위 View들의 레이아웃을 다시 계산하게 된다.
+             */
+            if (viewModel.fullScreen.value == true) {
+                systemUIEvent.value = SystemUIType.FULLSCREEN_WITHOUT_SYSTEM_UI
+            } else {
+                systemUIEvent.value = SystemUIType.FULLSCREEN
+            }
+        }
+
+        sharedViewModel.selection.getCount().observe(viewLifecycleOwner) { count ->
+            optionMenuViewModel.selectedCountString = "$count"
+            optionMenuViewModel.selectedCountVisible = count != 0
+            optionMenuViewModel.isEnabled = count != 0
+        }
+
     }
 
     private val onScrollListener = object : RecyclerView.OnScrollListener() {
@@ -122,8 +206,7 @@ class PickleDetailFragment : DaggerFragment(), PickleDetailAdapter.OnImageListen
                 viewModel.currentMediaItem = adapter.peek(currentPosition)
                 viewModel.currentMediaItem?.let { item ->
                     viewModel.isChecked.value = sharedViewModel.selection.isSelected(item.getId())
-                    sharedViewModel.toolbarViewModel.title.value = item.media.name
-                    sharedViewModel.toolbarViewModel.subtitle.value =
+                    toolbarViewModel.title =
                         "${currentPosition + 1} / ${sharedViewModel.itemCount.value}"
                 }
             }
@@ -185,9 +268,12 @@ class PickleDetailFragment : DaggerFragment(), PickleDetailAdapter.OnImageListen
 
     private fun prepareSharedElementTransition() {
         if (DeviceUtil.isAndroid5Later()) {
-            val transition = TransitionInflater.from(context)
+//            val transition = TransitionInflater.from(context)
+//                .inflateTransition(R.transition.image_shared_element_transition)
+//            sharedElementEnterTransition = transition
+
+            sharedElementEnterTransition = TransitionInflater.from(context)
                 .inflateTransition(R.transition.image_shared_element_transition)
-            sharedElementEnterTransition = transition
 
             setEnterSharedElementCallback(
                 object : SharedElementCallback() {
@@ -211,9 +297,10 @@ class PickleDetailFragment : DaggerFragment(), PickleDetailAdapter.OnImageListen
         val currentPosition =
             (binding.recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
         sharedViewModel.bindingItemAdapterPosition.set(currentPosition)
+        this._binding = null
     }
 
-    override fun onLoaded(position: Int) {
+    override fun onImageAppeared(position: Int) {
         if (DeviceUtil.isAndroid5Later()) {
             if (sharedViewModel.bindingItemAdapterPosition.get() != position) {
                 return
@@ -221,6 +308,27 @@ class PickleDetailFragment : DaggerFragment(), PickleDetailAdapter.OnImageListen
 
             startPostponedEnterTransition()
             sharedViewModel.currentDestinationId.value = R.id.pickleDetailFragment
+            systemUIEvent.value = SystemUIType.FULLSCREEN
+
+            ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
+                when (view.display.rotation) {
+                    Surface.ROTATION_90 -> {
+                        binding.toolbarBinding.toolbar.setMarginLeft(0)
+                        binding.toolbarBinding.toolbar.setMarginRight(insets.systemWindowInsetRight)
+                    }
+                    Surface.ROTATION_270 -> {
+                        binding.toolbarBinding.toolbar.setMarginLeft(insets.systemWindowInsetLeft)
+                        binding.toolbarBinding.toolbar.setMarginRight(0)
+                    }
+                    else -> {
+                        binding.toolbarBinding.toolbar.setMarginLeft(insets.systemWindowInsetLeft)
+                        binding.toolbarBinding.toolbar.setMarginRight(insets.systemWindowInsetRight)
+                    }
+                }
+                binding.toolbarBinding.toolbar.setMarginTop(insets.systemWindowInsetTop)
+                binding.toolbarBinding.toolbar.setMarginBottom(insets.systemWindowInsetBottom)
+                insets
+            }
         }
     }
 

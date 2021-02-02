@@ -1,5 +1,7 @@
 package com.charlezz.pickle.util.bindingadapter
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.view.Surface
 import android.view.View
 import androidx.core.view.ViewCompat
@@ -67,5 +69,48 @@ fun setMargin(
         insets
     }
 
+
+}
+
+
+@BindingAdapter(value = ["crossfadeVisible"])
+fun crossfade(view: View, visible: Boolean) {
+    if (visible) {
+        view.visibility = View.VISIBLE
+        view.animate()
+            .alpha(1f)
+            .setListener(null)
+    } else {
+        view.animate()
+            .alpha(0f)
+            .setListener(object : AnimatorListenerAdapter() {
+
+                override fun onAnimationEnd(animation: Animator?) {
+                    super.onAnimationEnd(animation)
+                    view.visibility = View.GONE
+                }
+            })
+    }
+}
+
+@BindingAdapter(value = ["crossfadeVisibleNoBlinking"])
+fun crossfadeNoBlinking(view: View, visible: Boolean) {
+    if (visible) {
+        view.visibility = View.VISIBLE
+        view.animate()
+            .alpha(1f)
+            .setListener(null)
+    } else {
+        view.visibility = View.GONE
+        view.animate()
+            .alpha(0f)
+            .setListener(object : AnimatorListenerAdapter() {
+
+                override fun onAnimationEnd(animation: Animator?) {
+                    super.onAnimationEnd(animation)
+                    view.visibility = View.GONE
+                }
+            })
+    }
 
 }

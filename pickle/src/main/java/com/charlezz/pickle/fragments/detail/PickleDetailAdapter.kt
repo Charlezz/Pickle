@@ -9,6 +9,7 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
+import com.charlezz.pickle.OnImageAppearedListener
 import com.charlezz.pickle.R
 import com.charlezz.pickle.Selection
 import com.charlezz.pickle.data.MediaItemDiffCallback
@@ -47,7 +48,7 @@ class PickleDetailAdapter @Inject constructor(
                         target: Target<Drawable>?,
                         isFirstResource: Boolean
                     ): Boolean {
-                        onImageListener?.onLoaded(position)
+                        onImageAppearedListener?.onImageAppeared(position)
                         return false
                     }
 
@@ -58,7 +59,7 @@ class PickleDetailAdapter @Inject constructor(
                         dataSource: DataSource?,
                         isFirstResource: Boolean
                     ): Boolean {
-                        onImageListener?.onLoaded(position)
+                        onImageAppearedListener?.onImageAppeared(position)
                         return false
                     }
                 })
@@ -75,9 +76,6 @@ class PickleDetailAdapter @Inject constructor(
         return DataBindingHolder(parent, viewType)
     }
 
-    var onImageListener:OnImageListener? = null
-    interface OnImageListener{
-        fun onLoaded(position:Int)
-    }
+    var onImageAppearedListener:OnImageAppearedListener? = null
 
 }

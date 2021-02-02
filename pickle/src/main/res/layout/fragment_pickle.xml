@@ -7,13 +7,20 @@
 
     <data>
 
-        <import type="com.charlezz.pickle.util.MeasureUtil" />
+        <variable
+            name="toolbarViewModel"
+            type="com.charlezz.pickle.uimodel.ToolbarViewModel" />
 
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
+        <include
+            android:id="@+id/toolbar_binding"
+            layout="@layout/view_pickle_toolbar"
+            app:toolbarViewModel="@{toolbarViewModel}" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_view"
@@ -22,7 +29,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/toolbar_binding"
             tools:listitem="@layout/view_pickle_media" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

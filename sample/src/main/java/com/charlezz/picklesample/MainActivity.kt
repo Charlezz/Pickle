@@ -1,14 +1,16 @@
 package com.charlezz.picklesample
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.charlezz.pickle.Config
+import com.charlezz.pickle.SingleConfig
 import com.charlezz.pickle.data.entity.Media
 import com.charlezz.pickle.getPickle
+import com.charlezz.pickle.getPickleForSingle
 import com.charlezz.picklesample.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -17,8 +19,11 @@ class MainActivity : AppCompatActivity() {
 
     private val adapter = MainAdapter()
 
-    private val launcher = getPickle { mediaList: List<Media> ->
-        Log.d("MainActivity", "list.size = ${mediaList.size} $mediaList")
+    private val singleLauncher = getPickleForSingle { media: Media? ->
+        media?.let { adapter.setImages(listOf(media)) }
+    }
+
+    private val launcher = getPickle { mediaList:List<Media> ->
         adapter.setImages(mediaList)
     }
 
@@ -26,15 +31,19 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
+        binding.recyclerView.layoutManager = LinearLayoutManager(this)
         binding.recyclerView.adapter = adapter
+
+        binding.singleBtn.setOnClickListener {
+            singleLauncher.launch(SingleConfig.default)
+        }
+
         binding.btn.setOnClickListener {
-            launcher.launch(Config.default.apply {
-            })
+            launcher.launch(Config.default)
         }
 
         if (savedInstanceState == null) {
-            launcher.launch(Config.default.apply {
-            })
+            singleLauncher.launch(SingleConfig.default)
         }
 
         adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
@@ -44,6 +53,8 @@ class MainActivity : AppCompatActivity() {
                     if (adapter.itemCount == 0) View.VISIBLE else View.GONE
             }
         })
+
+
 
     }
 

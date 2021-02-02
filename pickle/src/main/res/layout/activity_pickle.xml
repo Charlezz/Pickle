@@ -5,9 +5,6 @@
 
     <data>
 
-        <variable
-            name="toolbarViewModel"
-            type="com.charlezz.pickle.ToolbarViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -26,20 +23,6 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:navGraph="@navigation/pickle_graph" />
-
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/tool_bar"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:toolbar_onTitleClick="@{v->toolbarViewModel.onTitleClick()}"
-            app:toolbar_onTitleLongClick="@{v->toolbarViewModel.onTitleLongClick()}"
-            app:toolbar_subtitle="@{toolbarViewModel.subtitle}"
-            app:toolbar_subtitle_visible="@{toolbarViewModel.subtitleVisible}"
-            app:toolbar_title="@{toolbarViewModel.title}"
-            app:visible="@{toolbarViewModel.visible}" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

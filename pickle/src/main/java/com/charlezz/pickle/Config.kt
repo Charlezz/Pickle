@@ -5,12 +5,13 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class Config(
+open class Config internal constructor(
+    internal var singleMode:Boolean,
     var debugMode: Boolean = true,
-    var environmentDir:String = Environment.DIRECTORY_DCIM,
+    var environmentDir: String = Environment.DIRECTORY_DCIM,
     var dirToSave: String = "Camera"
-) : Parcelable {
-    companion object {
-        val default = Config()
+) : Parcelable{
+    companion object{
+        val default = Config(false)
     }
 }
