@@ -96,7 +96,7 @@ class PickleDetailFragment : DaggerFragment(), OnImageAppearedListener {
         super.onCreateOptionsMenu(menu, inflater)
         optionMenuViewModel.onCreateOptionMenu(menu)
         optionMenuViewModel.apply {
-            menuTitle = getString(R.string.done)
+            menuTitle = getString(config.doneTextRes)
             setTitleTextColor(ContextCompat.getColor(context, R.color.point_color))
             setDisableTitleTextColor(Color.parseColor("#ffffff"))
         }

@@ -1,16 +1,14 @@
 <resources>
-    <string name="app_name">Pickle</string>
-    <string name="confirm">OK</string>
-    <string name="select">Select</string>
-    <string name="toast_error_file_create">Can not create a file</string>
-    <string name="done">Done</string>
-    <string name="desc_check_box">CheckBox</string>
-    <string name="desc_camera">Camera</string>
-    <string name="desc_thumbnail">Thumbnail</string>
-    <string name="attach">Attach</string>
-    <string name="folder">Folder</string>
-    <string name="recent">Recent</string>
-    <string name="are_you_sure_to_exit">Are you sure to exit?</string>
-    <string name="cancel">Cancel</string>
-    <string name="albums">Albums</string>
+    <string name="pickle_ok">OK</string>
+    <string name="pickle_done">Done</string>
+    <string name="pickle_cancel">Cancel</string>
+    <string name="pickle_recent">Recent</string>
+    <string name="pickle_albums">Albums</string>
+    <string name="pickle_confirm">Confirm</string>
+
+    <string name="pickle_are_you_sure_to_exit">Are you sure to exit?</string>
+    <string name="pickle_toast_error_file_create">Can not create a file</string>
+    <string name="pickle_desc_check_box">CheckBox</string>
+    <string name="pickle_desc_camera">Camera</string>
+    <string name="pickle_desc_thumbnail">Thumbnail</string>
 </resources>

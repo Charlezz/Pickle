@@ -133,7 +133,7 @@ class PickleFragment : DaggerFragment(),
         if (!config.singleMode) {
             optionMenuViewModel.onCreateOptionMenu(menu)
             this.optionMenuViewModel.apply {
-                menuTitle = getString(R.string.done)
+                menuTitle = getString(config.doneTextRes)
                 setTitleTextColor(ContextCompat.getColor(context, R.color.point_color))
                 setDisableTitleTextColor(Color.parseColor("#aaaaaa"))
             }
@@ -221,7 +221,7 @@ class PickleFragment : DaggerFragment(),
 
         sharedViewModel.currentFolder.observe(viewLifecycleOwner) { folder ->
             toolbarViewModel.title =
-                (folder?.name ?: requireContext().getString(R.string.recent)) + " ▾"
+                (folder?.name ?: requireContext().getString(config.recentTextRes)) + " ▾"
             if (folder?.bucketId == null && sharedViewModel.cameraUtil.hasCamera()) {
                 binding.recyclerView.adapter = adapters.concatedAdapter
             } else {
@@ -283,7 +283,7 @@ class PickleFragment : DaggerFragment(),
     private fun prepareImageCapture() {
         sharedViewModel.cameraUtil.prepareImageCapture(
             readyToLaunch = { uri -> takePictureLauncher.launch(uri) },
-            fallback = { showToast(R.string.toast_error_file_create) }
+            fallback = { showToast(R.string.pickle_toast_error_file_create) }
         )
     }
 
@@ -292,9 +292,9 @@ class PickleFragment : DaggerFragment(),
             requireActivity().finish()
         } else {
             AlertDialog.Builder(requireContext())
-                .setMessage(R.string.are_you_sure_to_exit)
-                .setPositiveButton(R.string.confirm) { _, _ -> requireActivity().finish() }
-                .setNegativeButton(R.string.cancel) { _, _ -> }
+                .setMessage(R.string.pickle_are_you_sure_to_exit)
+                .setPositiveButton(config.confirmTextRes) { _, _ -> requireActivity().finish() }
+                .setNegativeButton(config.cancelTextRes) { _, _ -> }
                 .show()
         }
     }

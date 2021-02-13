@@ -12,6 +12,7 @@ import androidx.databinding.Bindable
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.LifecycleOwner
 import com.charlezz.pickle.BR
+import com.charlezz.pickle.Config
 import com.charlezz.pickle.R
 import com.charlezz.pickle.databinding.ViewPickleOptionBinding
 import com.charlezz.pickle.util.lifecycle.SingleLiveEvent
@@ -19,6 +20,7 @@ import javax.inject.Inject
 
 class OptionMenuViewModel @Inject constructor(
     val context: Context,
+    val config: Config,
 ) : BaseObservable() {
 
     val clickEvent = SingleLiveEvent<Unit>(300)
@@ -68,7 +70,8 @@ class OptionMenuViewModel @Inject constructor(
             notifyPropertyChanged(BR.selectedCountVisible)
         }
 
-    var selectedCountBackgroundRes: Drawable? = ContextCompat.getDrawable(context, R.drawable.bg_media_picker_option_count)
+    var selectedCountBackgroundRes: Drawable? =
+        ContextCompat.getDrawable(context, R.drawable.bg_media_picker_option_count)
         @Bindable get
         set(value) {
             field = value

@@ -9,7 +9,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.charlezz.pickle.PickleSharedViewModel
-import com.charlezz.pickle.R
 import com.charlezz.pickle.databinding.FragmentPickleAlbumBinding
 import com.charlezz.pickle.uimodel.ToolbarViewModel
 import com.charlezz.pickle.util.dagger.SharedViewModelProvider
@@ -65,7 +64,6 @@ class PickleAlbumFragment : DaggerFragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.lifecycleOwner = viewLifecycleOwner
         (requireActivity() as AppCompatActivity).setSupportActionBar(binding.toolbarBinding.toolbar)
-        toolbarViewModel.title = requireContext().getString(R.string.albums)
         binding.toolbarViewModel = toolbarViewModel
         binding.recyclerView.layoutManager =
             gridLayoutManagerProvider.get().also { gridLayoutManager ->

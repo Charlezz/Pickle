@@ -13,10 +13,6 @@ object PickleConstants {
     const val NO_POSITION = -1
     const val KEY_CONFIG = "config"
 
-    const val KEY_CONTRACT_TYPE = "contract_type"
-    const val KEY_CONTRACT_SINGLE = "single_media"
-    const val KEY_CONTRACT_MULTIPLE = "multiple_media"
-
     const val KEY_RESULT_SINGLE = "result_media"
     const val KEY_RESULT_MULTIPLE = "result_media_list"
 

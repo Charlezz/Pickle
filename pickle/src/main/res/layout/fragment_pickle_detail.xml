@@ -50,7 +50,7 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:clickable="@{viewModel.checkBoxEnabled}"
-                android:contentDescription="@string/desc_check_box"
+                android:contentDescription="@string/pickle_desc_check_box"
                 android:onClick="@{v->viewModel.onCheckBoxClick()}"
                 android:padding="10dp"
                 android:src="@{viewModel.isChecked()?@drawable/check_circle_on:@drawable/check_circle_off}"

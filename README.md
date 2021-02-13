@@ -6,28 +6,74 @@
 <img src="https://github.com/Charlezz/Pickle/blob/main/pickle.jpg" width="200">
 <br>
 Designed based on Paging3.
-
 ## Installation
+
+### 1. Add dependency
+
+ Add this line to `build.gradle` for your application module
+
 ```bash
-implementation 'com.charlezz:pickle:latest_version'
-```
-## How to use
-1. Initilization
-The launcher MUST be initialized before Lifecycle.State.STARTED
-```bash
-val launcher:ActivityResultLauncher<Config> = getPickle { mediaList:List<Media> ->
-    //handle the result
+dependencies{
+    implementation 'com.charlezz:pickle:latest_version'
 }
 ```
-2. Configure your Config if you want and call launch() function
+### 2. Enable databinding
+
+ Add this line to `build.gradle` for your application module
+
+```
+android{
+    buildFeatures.dataBinding = true
+}
+```
+
+For the reason why Pickle uses dataBinding library, you may want to set dataBinding in your app `build.gradle` otherwise you will see the error below.
+
+`java.lang.NoClassDefFoundError: Failed resolution of: Landroidx/databinding/DataBinderMapperImpl;`
+
+## How to use
+
+### 1. Initilization
+
+The launcher MUST be initialized before Lifecycle.State.STARTED
+
+```bash
+val launcher:ActivityResultLauncher<Config> = getPickle { mediaList:List<Media> ->
+    // handle the result
+}
+```
+### 2. Configure your Config if you want and call launch() function
+
 ```bash
 launcher.launch(Config.default)
 ```
 
 ## Configuration
 
-- tbd
+Customize a config if you want
 
+```
+val config = Config.default.apply {  
+    //add whatever you want below
+    debugMode = false // this flag disables printing log from Timber
+}
+```
+
+You may want to use SingleConfig when user can pick only one Image or Video.
+
+```
+// init
+private val singleLauncher = getPickleForSingle { media: Media? ->
+    // do something with a media
+}
+...
+// Launch Pickle with SingleConfig
+singleLauncher.launch(SingleConfig.default)
+```
+
+## For Java User
+
+Tbd
 
 ## License
 

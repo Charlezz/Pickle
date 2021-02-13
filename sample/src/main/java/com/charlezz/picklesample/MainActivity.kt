@@ -23,8 +23,11 @@ class MainActivity : AppCompatActivity() {
         media?.let { adapter.setImages(listOf(media)) }
     }
 
-    private val launcher = getPickle { mediaList:List<Media> ->
-        adapter.setImages(mediaList)
+    private val launcher = getPickle { mediaList:List<Media>? ->
+        mediaList?.let {
+            adapter.setImages(it)
+        }
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,7 +42,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btn.setOnClickListener {
-            launcher.launch(Config.default)
+            launcher.launch(Config.default.apply {
+                this.debugMode = false
+            })
         }
 
         if (savedInstanceState == null) {

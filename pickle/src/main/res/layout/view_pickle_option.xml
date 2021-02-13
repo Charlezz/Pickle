@@ -46,7 +46,6 @@
             android:textColor="@{viewModel.titleTextColor}"
             android:textSize="16dp"
             bind:visible="@{viewModel.menuTitleVisible}"
-            tools:text="@string/confirm"
             tools:visibility="visible" />
 
     </LinearLayout>

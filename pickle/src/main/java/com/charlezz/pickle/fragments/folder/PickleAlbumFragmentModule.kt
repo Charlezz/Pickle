@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
+import com.charlezz.pickle.Config
 import com.charlezz.pickle.R
 import com.charlezz.pickle.uimodel.ToolbarViewModel
 import com.charlezz.pickle.util.MeasureUtil
@@ -41,8 +42,10 @@ abstract class PickleAlbumFragmentModule {
         }
         @Provides
         @FragmentScope
-        fun provideToolbarViewModel(context:Context): ToolbarViewModel {
-            return ToolbarViewModel(context)
+        fun provideToolbarViewModel(context:Context,config:Config): ToolbarViewModel {
+            return ToolbarViewModel(context).apply {
+                title = context.getString(config.albumsTextRes)
+            }
         }
     }
 

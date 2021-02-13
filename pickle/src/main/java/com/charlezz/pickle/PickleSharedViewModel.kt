@@ -10,7 +10,6 @@ import androidx.paging.map
 import com.charlezz.pickle.data.entity.Album
 import com.charlezz.pickle.data.entity.Media
 import com.charlezz.pickle.data.entity.MediaItem
-import com.charlezz.pickle.data.entity.getUri
 import com.charlezz.pickle.fragments.main.AppPickleRepository
 import com.charlezz.pickle.fragments.main.PicklePagingSource
 import com.charlezz.pickle.fragments.main.PickleRepository
@@ -69,7 +68,7 @@ class PickleSharedViewModel @AssistedInject constructor(
                 PickleConstants.DEFAULT_POSITION,
                 PickleConstants.DEFAULT_PAGE_SIZE
             ).map { pagingData ->
-                pagingData.map { media -> MediaItem(media, this) }
+                pagingData.map { media -> MediaItem(media, config, this) }
             }
         }
         .cachedIn(viewModelScope)

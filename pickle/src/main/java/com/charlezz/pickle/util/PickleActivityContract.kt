@@ -10,7 +10,6 @@ import com.charlezz.pickle.data.entity.Media
 class PickleActivityContract : ActivityResultContract<Config, ArrayList<Media>>() {
     override fun createIntent(context: Context, input: Config?): Intent {
         return Intent(context, PickleActivity::class.java).apply {
-            putExtra(PickleConstants.KEY_CONTRACT_TYPE, PickleConstants.KEY_CONTRACT_MULTIPLE)
             putExtra(PickleConstants.KEY_CONFIG, input)
         }
     }

@@ -25,7 +25,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:contentDescription="@string/desc_camera"
+            android:contentDescription="@string/pickle_desc_camera"
             app:tint="@color/white"
             tools:tint="@color/white"
             android:src="@drawable/camera_alt_24px" />

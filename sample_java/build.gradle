@@ -3,15 +3,17 @@ plugins {
 }
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion "30.0.2"
+    compileSdkVersion project.compileSdk
+    buildToolsVersion project.buildTools
+
+    buildFeatures.dataBinding = true
 
     defaultConfig {
         applicationId "com.charlezz.pickle.sample_java"
-        minSdkVersion 16
-        targetSdkVersion 30
+        minSdkVersion project.minSdk
+        targetSdkVersion project.targetSdk
         versionCode 1
-        versionName "1.0"
+        versionName getDateText()
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -29,11 +31,24 @@ android {
 }
 
 dependencies {
-
+    implementation project(path: ':pickle')
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'com.google.android.material:material:1.2.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+
+    implementation "com.xwray:groupie:2.9.0"
+    implementation "com.xwray:groupie-viewbinding:2.9.0"
+
+    //glide
+    implementation "com.github.bumptech.glide:glide:4.12.0"
+
+}
+
+static def getDateText() {
+    def date = new Date()
+    def formattedDateText = date.format("HH:mm:ss")
+    return formattedDateText
 }

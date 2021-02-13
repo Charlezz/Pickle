@@ -27,7 +27,7 @@
             android:id="@+id/image"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:contentDescription="@string/desc_thumbnail"
+            android:contentDescription="@string/pickle_desc_thumbnail"
             android:onClick="@{v->item.listener.onItemClick(v,item, position)}"
             android:scaleType="centerCrop"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -36,18 +36,31 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:src="@android:drawable/sym_def_app_icon" />
+        <View
+            android:id="@+id/dim"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@color/black_a50"
+            app:visible="@{selection.isSelected(item.id)}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/checked"
             android:layout_width="50dp"
+            app:visible="@{item.checkViewVisible}"
             android:layout_height="50dp"
-            android:contentDescription="@string/desc_check_box"
+            android:contentDescription="@string/pickle_desc_check_box"
             android:onClick="@{v->item.listener.onCheckBoxClick(item)}"
             android:padding="10dp"
             android:src="@{selection.isSelected(item.id)?@drawable/check_circle_on:@drawable/check_circle_off}"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:src="@drawable/check_circle_on" />
+
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
