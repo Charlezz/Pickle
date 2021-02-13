@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import com.charlezz.pickle.data.entity.CameraItem
+import com.charlezz.pickle.uimodel.ToolbarViewModel
+import com.charlezz.pickle.util.MeasureUtil
 import com.charlezz.pickle.util.PickleConstants
 import com.charlezz.pickle.util.dagger.AssistedSavedStateViewModelFactory
 import com.charlezz.pickle.util.dagger.FragmentScope
@@ -25,8 +27,11 @@ abstract class PickleFragmentModule {
 
         @Provides
         @FragmentScope
-        fun provideGridSpaceDecoration() =
-            GridSpaceDecoration(spanCount = PickleConstants.DEFAULT_SPAN_COUNT)
+        fun provideGridSpaceDecoration(context: Context) =
+            GridSpaceDecoration(
+                spanCount = PickleConstants.DEFAULT_SPAN_COUNT,
+                space = MeasureUtil.dpToPx(context, 2f)
+            )
 
         @Provides
         @FragmentScope
@@ -34,6 +39,13 @@ abstract class PickleFragmentModule {
             fragment: PickleFragment,
             factory: InjectingSavedStateViewModelFactory
         ) = ViewModelProvider(fragment, factory.create(fragment))
+
+        @Provides
+        @FragmentScope
+        fun provideToolbarViewModel(context:Context):ToolbarViewModel{
+            return ToolbarViewModel(context)
+        }
+
 
     }
 

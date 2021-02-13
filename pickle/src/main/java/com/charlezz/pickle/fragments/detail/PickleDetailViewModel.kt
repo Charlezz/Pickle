@@ -4,7 +4,6 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.Transformations
 import com.charlezz.pickle.data.entity.MediaItem
 import com.charlezz.pickle.util.dagger.AssistedSavedStateViewModelFactory
 import com.charlezz.pickle.util.lifecycle.SingleLiveEvent
@@ -17,19 +16,19 @@ class PickleDetailViewModel @AssistedInject constructor(
     @Assisted private val savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(app) {
 
-    var checkBoxEnabled = MutableLiveData(true)
+    val checkBoxEnabled = MutableLiveData(true)
     val isChecked = MutableLiveData<Boolean>()
     var currentMediaItem: MediaItem? = null
     val checkBoxClickEvent = SingleLiveEvent<MediaItem?>()
-
-    val guideTopMargin = MutableLiveData(0)
-
-    //To prevent blinking CheckBox
-    val checkBoxVisible = Transformations.map(guideTopMargin){ it!=0 }
+    val fullScreen = MutableLiveData<Boolean>(false)
 
     fun onCheckBoxClick() {
         Timber.d("onCheckBoxClick")
         checkBoxClickEvent.value = currentMediaItem
+    }
+
+    fun crossfade() {
+        fullScreen.value = !(fullScreen.value ?: true)
     }
 
     @AssistedInject.Factory

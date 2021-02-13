@@ -6,16 +6,20 @@ import android.database.Cursor
 import android.os.Environment
 import android.provider.MediaStore
 import androidx.core.database.getStringOrNull
-import com.charlezz.pickle.R
+import com.charlezz.pickle.Config
 import com.charlezz.pickle.data.entity.Album
 import com.charlezz.pickle.util.DeviceUtil
 import com.charlezz.pickle.util.PickleConstants
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import timber.log.Timber
+import javax.inject.Inject
 
 @SuppressLint("InlinedApi")
-class PickleAlbumRepository(private val context: Context) {
+class PickleAlbumRepository @Inject constructor(
+    private val context: Context,
+    private val config: Config
+) {
 
     private val contentUri = PickleConstants.getContentUri()
 
@@ -46,7 +50,7 @@ class PickleAlbumRepository(private val context: Context) {
     suspend fun load(): Flow<HashMap<Long?, Album>> {
         return flow {
             //Recent
-            val recentMediaCursor:Cursor? = context.contentResolver.query(
+            val recentMediaCursor: Cursor? = context.contentResolver.query(
                 contentUri,
                 projection,
                 selection,
@@ -63,7 +67,7 @@ class PickleAlbumRepository(private val context: Context) {
                         )
                     ),
                     bucketId = null,
-                    name = context.getString(R.string.recent),
+                    name = context.getString(config.recentTextRes),
                     count = recentMediaCursor.count,
                     order = PickleConstants.FOLDER_ORDER_RECENT,
                     relativePath = recentMediaCursor.getStringOrNull(

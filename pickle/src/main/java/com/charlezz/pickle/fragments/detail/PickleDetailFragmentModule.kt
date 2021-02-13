@@ -1,12 +1,16 @@
 package com.charlezz.pickle.fragments.detail
 
 import android.content.Context
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
+import com.charlezz.pickle.R
+import com.charlezz.pickle.uimodel.ToolbarViewModel
+import com.charlezz.pickle.util.DeviceUtil
 import com.charlezz.pickle.util.dagger.AssistedSavedStateViewModelFactory
 import com.charlezz.pickle.util.dagger.FragmentScope
 import com.charlezz.pickle.util.dagger.InjectingSavedStateViewModelFactory
@@ -50,6 +54,21 @@ abstract class PickleDetailFragmentModule {
             return ViewModelProvider(fragment, factory.create(fragment))
         }
 
+        @Provides
+        @FragmentScope
+        fun provideToolbarViewModel(context:Context): ToolbarViewModel {
+            return ToolbarViewModel(context).apply {
+                if(DeviceUtil.isAndroid5Later()){
+                    backgroundColorRes = R.color.black_a50
+                }else{
+                    backgroundColorRes = R.color.black
+                }
+
+                titleTextColorRes = R.color.white
+                alignCenter = true
+                navigationIcon = ContextCompat.getDrawable(context, R.drawable.ico_pickle_close)
+            }
+        }
     }
 
     @Binds

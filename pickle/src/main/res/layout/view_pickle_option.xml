@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.charlezz.pickle.uimodel.OptionMenuViewModel" />
+    </data>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="56dp"
+        android:enabled="@{viewModel.enabled}"
+        android:onClick="@{v -> viewModel.onClick()}">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"
+            android:layout_gravity="center_vertical"
+            android:gravity="center"
+            android:paddingLeft="7dp"
+            android:paddingRight="7dp"
+            android:text="@{viewModel.selectedCountString}"
+            android:textColor="@{viewModel.selectedCountTextColor}"
+            android:textSize="10dp"
+            android:textStyle="bold"
+            bind:background="@{viewModel.selectedCountBackgroundRes}"
+            bind:visible="@{viewModel.selectedCountVisible}"
+            tools:text="100"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/title_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="56dp"
+            android:layout_centerInParent="true"
+            android:layout_marginLeft="6dp"
+            android:layout_marginRight="9.5dp"
+            android:background="@drawable/bg_pickle_ripple"
+            android:gravity="center"
+            android:text="@{viewModel.menuTitle}"
+            android:textColor="@{viewModel.titleTextColor}"
+            android:textSize="16dp"
+            bind:visible="@{viewModel.menuTitleVisible}"
+            tools:visibility="visible" />
+
+    </LinearLayout>
+</layout>

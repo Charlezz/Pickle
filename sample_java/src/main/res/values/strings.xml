@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">PickleJavaSample</string>
+    <string name="start_pickle">Start Pickle</string>
+    <string name="no_images">[No Images]</string>
+
+    <string name="transition_name_thumbnail">thumbnail</string>
+</resources>

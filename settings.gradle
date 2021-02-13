@@ -1,3 +1,4 @@
+include ':sample_java'
 rootProject.name='PickleSample'
 include ':pickle'
 include ':sample'
