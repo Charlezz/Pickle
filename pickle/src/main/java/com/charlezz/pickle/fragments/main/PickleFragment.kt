@@ -1,15 +1,18 @@
 package com.charlezz.pickle.fragments.main
 
 import android.Manifest
+import android.app.Activity
 import android.app.AlertDialog
+import android.content.Intent
 import android.content.res.Configuration
+import android.graphics.Color
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.SharedElementCallback
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -19,14 +22,20 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionInflater
 import com.charlezz.pickle.Config
+import com.charlezz.pickle.OnImageAppearedListener
 import com.charlezz.pickle.PickleSharedViewModel
 import com.charlezz.pickle.R
 import com.charlezz.pickle.data.entity.CameraItem
+import com.charlezz.pickle.data.entity.SystemUIType
 import com.charlezz.pickle.databinding.FragmentPickleBinding
+import com.charlezz.pickle.uimodel.OptionMenuViewModel
+import com.charlezz.pickle.uimodel.ToolbarViewModel
 import com.charlezz.pickle.util.DeviceUtil
 import com.charlezz.pickle.util.MeasureUtil
+import com.charlezz.pickle.util.PickleConstants
 import com.charlezz.pickle.util.dagger.SharedViewModelProvider
 import com.charlezz.pickle.util.ext.showToast
+import com.charlezz.pickle.util.lifecycle.SingleLiveEvent
 import com.charlezz.pickle.util.recyclerview.GridSpaceDecoration
 import dagger.android.support.DaggerFragment
 import kotlinx.coroutines.flow.collectLatest
@@ -39,7 +48,7 @@ import kotlin.math.max
 
 class PickleFragment : DaggerFragment(),
     CameraItem.OnItemClickListener,
-    PickleItemAdapter.OnImageListener {
+    OnImageAppearedListener {
 
 
     @Inject
@@ -61,11 +70,24 @@ class PickleFragment : DaggerFragment(),
     @Inject
     lateinit var config: Config
 
+    @Inject
+    lateinit var toolbarViewModel: ToolbarViewModel
+
+    @Inject
+    lateinit var optionMenuViewModel: OptionMenuViewModel
+
+    @Inject
+    lateinit var systemUIEvent: SingleLiveEvent<SystemUIType>
+
     private lateinit var sharedViewModel: PickleSharedViewModel
 
     private lateinit var viewModel: PickleViewModel
 
-    private lateinit var binding: FragmentPickleBinding
+    private var _binding: FragmentPickleBinding? = null
+
+    private val binding get() = _binding!!
+
+    private val navigateAlbumEvent = SingleLiveEvent<Unit>()
 
     private val takePictureLauncher =
         registerForActivityResult(TakePictureContract()) { activityResult: Boolean ->
@@ -96,12 +118,24 @@ class PickleFragment : DaggerFragment(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
         this.sharedViewModel = sharedViewModelProvider.get(PickleSharedViewModel::class.java)
         this.viewModel = viewModelProvider.get(PickleViewModel::class.java)
-        lifecycle.addObserver(viewModel)
         lifecycleScope.launch {
             sharedViewModel.items.collectLatest {
                 adapters.itemAdapter.submitData(it)
+            }
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        if (!config.singleMode) {
+            optionMenuViewModel.onCreateOptionMenu(menu)
+            this.optionMenuViewModel.apply {
+                menuTitle = getString(config.doneTextRes)
+                setTitleTextColor(ContextCompat.getColor(context, R.color.point_color))
+                setDisableTitleTextColor(Color.parseColor("#aaaaaa"))
             }
         }
     }
@@ -111,18 +145,25 @@ class PickleFragment : DaggerFragment(),
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentPickleBinding.inflate(inflater, container, false)
-        prepareTransitions()
+        _binding = FragmentPickleBinding.inflate(inflater, container, false)
+        (requireActivity() as AppCompatActivity).setSupportActionBar(binding.toolbarBinding.toolbar)
+        prepareExitTransitions()
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Timber.d("onViewCreated")
-        sharedViewModel.toolbarViewModel.apply {
-            titleClickEvent.observe(viewLifecycleOwner){
-                findNavController().navigate(PickleFragmentDirections.actionPickleFragmentToPickleFolderFragment())
-            }
+        viewLifecycleOwner.lifecycle.addObserver(viewModel)
+        binding.toolbarViewModel = toolbarViewModel
+        sharedViewModel.currentDestinationId.value = R.id.pickleFragment
+
+        toolbarViewModel.onTitleClickListener = View.OnClickListener {
+            navigateAlbumEvent.call()
+        }
+
+        navigateAlbumEvent.observe(viewLifecycleOwner) {
+            findNavController().navigate(PickleFragmentDirections.actionPickleFragmentToPickleFolderFragment())
         }
         scrollToPosition()
         requireActivity().onBackPressedDispatcher.addCallback(
@@ -134,7 +175,7 @@ class PickleFragment : DaggerFragment(),
             })
 
         binding.lifecycleOwner = viewLifecycleOwner
-        adapters.itemAdapter.onImageListener = this
+        adapters.itemAdapter.onImageAppearedListener = this
         binding.recyclerView.layoutManager = gridLayoutManager.get()
         binding.recyclerView.addItemDecoration(gridSpaceDecoration)
         binding.recyclerView.setHasFixedSize(true)
@@ -168,24 +209,49 @@ class PickleFragment : DaggerFragment(),
             }
         }
 
-        sharedViewModel.itemCount.observe(viewLifecycleOwner) { count ->
-            if (count != null) {
-                sharedViewModel.toolbarViewModel.subtitle.value = resources.getQuantityString(
-                    R.plurals.numberOfMedia, count, count
-                )
-            }
+        sharedViewModel.itemCount.observe(viewLifecycleOwner) { totalCount ->
+
+        }
+
+        sharedViewModel.selection.getCount().observe(viewLifecycleOwner) { count ->
+            optionMenuViewModel.selectedCountString = "$count"
+            optionMenuViewModel.selectedCountVisible = count != 0
+            optionMenuViewModel.isEnabled = count != 0
         }
 
         sharedViewModel.currentFolder.observe(viewLifecycleOwner) { folder ->
-            sharedViewModel.toolbarViewModel.title.value =
-                (folder?.name ?: requireContext().getString(R.string.recent)) + " ▾"
+            toolbarViewModel.title =
+                (folder?.name ?: requireContext().getString(config.recentTextRes)) + " ▾"
             if (folder?.bucketId == null && sharedViewModel.cameraUtil.hasCamera()) {
                 binding.recyclerView.adapter = adapters.concatedAdapter
             } else {
                 binding.recyclerView.adapter = adapters.itemAdapter
             }
-
         }
+
+        sharedViewModel.singleImageEvent.observe(viewLifecycleOwner) { triple ->
+            requireActivity().setResult(Activity.RESULT_OK, Intent().apply {
+                val media = triple?.second
+                putExtra(PickleConstants.KEY_RESULT_SINGLE, media)
+            })
+            requireActivity().finish()
+        }
+
+        optionMenuViewModel.clickEvent.observe(viewLifecycleOwner) {
+            requireActivity().setResult(Activity.RESULT_OK, Intent().apply {
+                putParcelableArrayListExtra(
+                    PickleConstants.KEY_RESULT_MULTIPLE,
+                    ArrayList(sharedViewModel.getSelectedMediaList())
+                )
+            })
+            requireActivity().finish()
+        }
+
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     private fun onSpanCountChanged(count: Int) {
@@ -194,10 +260,8 @@ class PickleFragment : DaggerFragment(),
             spanCount = max(count, 1)
         }
         binding.recyclerView.layoutManager = gridLayoutManager
-        binding.recyclerView.addItemDecoration(gridSpaceDecoration.apply {
-            spanCount = count
-            space = MeasureUtil.dpToPx(requireContext(), 2f)
-        })
+        gridSpaceDecoration.spanCount = count
+        binding.recyclerView.invalidateItemDecorations()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -219,7 +283,7 @@ class PickleFragment : DaggerFragment(),
     private fun prepareImageCapture() {
         sharedViewModel.cameraUtil.prepareImageCapture(
             readyToLaunch = { uri -> takePictureLauncher.launch(uri) },
-            fallback = { showToast(R.string.toast_error_file_create) }
+            fallback = { showToast(R.string.pickle_toast_error_file_create) }
         )
     }
 
@@ -228,14 +292,14 @@ class PickleFragment : DaggerFragment(),
             requireActivity().finish()
         } else {
             AlertDialog.Builder(requireContext())
-                .setMessage(R.string.are_you_sure_to_exit)
-                .setPositiveButton(R.string.confirm) { _, _ -> requireActivity().finish() }
-                .setNegativeButton(R.string.cancel) { _, _ -> }
+                .setMessage(R.string.pickle_are_you_sure_to_exit)
+                .setPositiveButton(config.confirmTextRes) { _, _ -> requireActivity().finish() }
+                .setNegativeButton(config.cancelTextRes) { _, _ -> }
                 .show()
         }
     }
 
-    private fun prepareTransitions() {
+    private fun prepareExitTransitions() {
         if (DeviceUtil.isAndroid5Later()) {
             exitTransition = TransitionInflater.from(context)
                 .inflateTransition(R.transition.grid_exit_transition)
@@ -289,12 +353,13 @@ class PickleFragment : DaggerFragment(),
         })
     }
 
-    override fun onLoaded(position: Int) {
+    override fun onImageAppeared(position: Int) {
         if (DeviceUtil.isAndroid5Later()) {
             if (sharedViewModel.bindingItemAdapterPosition.get() != position) {
                 return
             }
             startPostponedEnterTransition()
+            systemUIEvent.value = SystemUIType.NORMAL
         }
     }
 }

@@ -21,8 +21,9 @@ data class Media constructor(
     val orientation: Int?,
     val size: Int,
     val duration: Long?
-) : Parcelable
-
-fun Media.getUri(): Uri {
-    return ContentUris.withAppendedId(contentUri, id)
+) : Parcelable{
+    fun getUri(): Uri {
+        return ContentUris.withAppendedId(contentUri, id)
+    }
 }
+

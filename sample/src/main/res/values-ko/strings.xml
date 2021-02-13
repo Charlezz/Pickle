@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Pickle 샘플앱</string>
+    <string name="start_pickle">Pickle 시작하기</string>
+    <string name="no_images">[선택 된 이미지가 없습니다.]</string>
+
+    <string name="transition_name_thumbnail">썸네일</string>
+</resources>

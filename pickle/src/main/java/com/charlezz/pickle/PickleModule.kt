@@ -3,6 +3,7 @@ package com.charlezz.pickle
 import android.app.Application
 import android.content.Context
 import androidx.lifecycle.ViewModelProvider
+import com.charlezz.pickle.data.entity.SystemUIType
 import com.charlezz.pickle.fragments.detail.PickleDetailFragment
 import com.charlezz.pickle.fragments.detail.PickleDetailFragmentModule
 import com.charlezz.pickle.fragments.folder.PickleAlbumFragment
@@ -14,6 +15,7 @@ import com.charlezz.pickle.util.dagger.FragmentScope
 import com.charlezz.pickle.util.dagger.InjectingSavedStateViewModelFactory
 import com.charlezz.pickle.util.dagger.PickleScope
 import com.charlezz.pickle.util.dagger.SharedViewModelProvider
+import com.charlezz.pickle.util.lifecycle.SingleLiveEvent
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -47,6 +49,14 @@ abstract class PickleModule {
         @PickleScope
         fun provideConfig(activity:PickleActivity): Config {
             return activity.intent.getParcelableExtra(PickleConstants.KEY_CONFIG)?:Config.default
+        }
+
+        @Provides
+        @PickleScope
+        fun provideSystemUIType() : SingleLiveEvent<SystemUIType>{
+            return SingleLiveEvent<SystemUIType>().apply{
+                value = SystemUIType.NORMAL
+            }
         }
 
     }

@@ -10,7 +10,6 @@ import androidx.paging.map
 import com.charlezz.pickle.data.entity.Album
 import com.charlezz.pickle.data.entity.Media
 import com.charlezz.pickle.data.entity.MediaItem
-import com.charlezz.pickle.data.entity.getUri
 import com.charlezz.pickle.fragments.main.AppPickleRepository
 import com.charlezz.pickle.fragments.main.PicklePagingSource
 import com.charlezz.pickle.fragments.main.PickleRepository
@@ -54,11 +53,11 @@ class PickleSharedViewModel @AssistedInject constructor(
 
     val selection: Selection = savedStateHandle.get<Selection>(KEY_SAVED_SELECTION) ?: Selection()
 
-    val toolbarViewModel = ToolbarViewModel()
-
     val bindingItemAdapterPosition = AtomicInteger(PickleConstants.NO_POSITION)
 
     val itemClickEvent = SingleLiveEvent<Triple<View, Media, Int>?>()
+
+    val singleImageEvent = SingleLiveEvent<Triple<View, Media, Int>?>()
 
     val items: Flow<PagingData<MediaItem>> = savedStateHandle.getLiveData<Album>(KEY_FOLDER)
         .asFlow()
@@ -69,7 +68,7 @@ class PickleSharedViewModel @AssistedInject constructor(
                 PickleConstants.DEFAULT_POSITION,
                 PickleConstants.DEFAULT_PAGE_SIZE
             ).map { pagingData ->
-                pagingData.map { media -> MediaItem(media, this) }
+                pagingData.map { media -> MediaItem(media, config, this) }
             }
         }
         .cachedIn(viewModelScope)
@@ -77,6 +76,8 @@ class PickleSharedViewModel @AssistedInject constructor(
     val itemCount = repository.getCount().asLiveData()
 
     val currentFolder = savedStateHandle.getLiveData<Album>(KEY_FOLDER)
+
+    val currentDestinationId = SingleLiveEvent<Int>()
 
     init {
         Timber.d("init = ${this.hashCode()}")
@@ -86,7 +87,14 @@ class PickleSharedViewModel @AssistedInject constructor(
     }
 
     override fun onItemClick(view: View, item: MediaItem, position: Int) {
-        itemClickEvent.value = Triple(view, item.media, position)
+        val triple = Triple(view, item.media, position)
+
+        if (config.singleMode) {
+            singleImageEvent.value = triple
+        } else {
+            itemClickEvent.value = triple
+        }
+
     }
 
     override fun onCheckBoxClick(item: MediaItem) {

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="toolbarViewModel"
+            type="com.charlezz.pickle.uimodel.ToolbarViewModel" />
+    </data>
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        bind:toolbar_navigationIcon="@{toolbarViewModel.navigationIcon}"
+        bind:toolbar_navigationIconBackground="@{toolbarViewModel.navigationIconBackground}"
+        bind:toolbar_onTitleClickListener="@{toolbarViewModel.onTitleClickListener}"
+        bind:toolbar_title="@{toolbarViewModel.title}"
+        bind:toolbar_titleDrawableRight="@{toolbarViewModel.titleDrawableRight}"
+        bind:toolbar_titleTextColor="@{toolbarViewModel.titleTextColor}"
+        bind:toolbar_alignCenter="@{toolbarViewModel.alignCenter}"
+        bind:toolbar_titleBackground="@{toolbarViewModel.titleBackground}"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@{toolbarViewModel.backgroundColor}"
+        app:contentInsetEnd="0dp"
+        app:contentInsetLeft="0dp"
+        app:contentInsetRight="0dp"
+        app:contentInsetStart="0dp"
+        app:contentInsetStartWithNavigation="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        app:subtitleTextAppearance="@style/font_11"
+        app:title="@{toolbarViewModel.title}"
+        app:titleTextAppearance="@style/font_18_b"
+        app:titleTextColor="#000000" />
+
+</layout>

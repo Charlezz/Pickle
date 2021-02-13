@@ -10,6 +10,8 @@
     <color name="background">@color/GR50</color>
     <color name="error">#B00020</color>
 
+    <color name="point_color">@color/GR500</color>
+
 
     <color name="GR50">#E8F5E9</color>
     <color name="GR100">#C8E6C9</color>
@@ -29,5 +31,6 @@
     <color name="light_white">#80ffffff</color>
     <color name="white">#ffffff</color>
     <color name="black">#000000</color>
+    <color name="black_a50">#7F000000</color>
 
 </resources>

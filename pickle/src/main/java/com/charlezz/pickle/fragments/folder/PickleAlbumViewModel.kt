@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 
 class PickleAlbumViewModel @AssistedInject constructor(
     val app: Application,
+    private val repository:PickleAlbumRepository,
     @Assisted val savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(app), AlbumItem.OnItemClickListener {
 
@@ -26,7 +27,7 @@ class PickleAlbumViewModel @AssistedInject constructor(
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            PickleAlbumRepository(app).load().map { map ->
+            repository.load().map { map ->
                 map.values.toList()
                     .sortedByDescending { folder -> folder.order }
                     .map { folder ->

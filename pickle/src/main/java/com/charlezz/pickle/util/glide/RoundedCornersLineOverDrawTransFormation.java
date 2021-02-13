@@ -20,7 +20,7 @@ import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 
 public class RoundedCornersLineOverDrawTransFormation extends BitmapTransformation {
-    private static final String ID = "com.nhn.android.band.image.transformation.RoundedCornersLineOverDrawTransFormation";
+    private static final String ID = "com_charlezz_pickle_RoundedCornersLineOverDrawTransFormation";
     private static final byte[] ID_BYTES = ID.getBytes(CHARSET);
     private final int roundingRadius;
     private final float lineWidth;
