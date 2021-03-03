@@ -4,7 +4,9 @@
 <p>
 <img src="https://github.com/Charlezz/Pickle/blob/main/pickle.jpg" width="200">
 <br>
+
 Designed based on Paging3.
+    
 ## Installation
 ### 1. Add dependency
 
