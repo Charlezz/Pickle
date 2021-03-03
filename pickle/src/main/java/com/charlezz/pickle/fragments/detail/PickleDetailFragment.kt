@@ -1,5 +1,7 @@
 package com.charlezz.pickle.fragments.detail
 
+import android.app.Activity
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.Matrix
 import android.os.Bundle
@@ -24,6 +26,7 @@ import com.charlezz.pickle.databinding.FragmentPickleDetailBinding
 import com.charlezz.pickle.uimodel.OptionMenuViewModel
 import com.charlezz.pickle.uimodel.ToolbarViewModel
 import com.charlezz.pickle.util.DeviceUtil
+import com.charlezz.pickle.util.PickleConstants
 import com.charlezz.pickle.util.dagger.SharedViewModelProvider
 import com.charlezz.pickle.util.ext.setMarginBottom
 import com.charlezz.pickle.util.ext.setMarginLeft
@@ -110,9 +113,6 @@ class PickleDetailFragment : DaggerFragment(), OnImageAppearedListener {
         _binding = FragmentPickleDetailBinding.inflate(inflater, container, false)
         (requireActivity() as AppCompatActivity).setSupportActionBar(binding.toolbarBinding.toolbar)
 
-//        prepareSharedElementTransition()
-
-
         return binding.root
     }
 
@@ -195,6 +195,16 @@ class PickleDetailFragment : DaggerFragment(), OnImageAppearedListener {
             optionMenuViewModel.isEnabled = count != 0
         }
 
+        optionMenuViewModel.clickEvent.observe(viewLifecycleOwner){
+            requireActivity().setResult(Activity.RESULT_OK, Intent().apply {
+                putParcelableArrayListExtra(
+                    PickleConstants.KEY_RESULT_MULTIPLE,
+                    ArrayList(sharedViewModel.getSelectedMediaList())
+                )
+            })
+            requireActivity().finish()
+        }
+
     }
 
     private val onScrollListener = object : RecyclerView.OnScrollListener() {
@@ -268,9 +278,6 @@ class PickleDetailFragment : DaggerFragment(), OnImageAppearedListener {
 
     private fun prepareSharedElementTransition() {
         if (DeviceUtil.isAndroid5Later()) {
-//            val transition = TransitionInflater.from(context)
-//                .inflateTransition(R.transition.image_shared_element_transition)
-//            sharedElementEnterTransition = transition
 
             sharedElementEnterTransition = TransitionInflater.from(context)
                 .inflateTransition(R.transition.image_shared_element_transition)

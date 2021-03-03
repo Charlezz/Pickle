@@ -61,8 +61,6 @@ class PickleActivity : AppCompatActivity(), HasAndroidInjector {
 
     private lateinit var sharedViewModel: PickleSharedViewModel
 
-    private var doneMenuItem: MenuItem? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         injectIfNecessary()
         super.onCreate(savedInstanceState)
@@ -74,21 +72,18 @@ class PickleActivity : AppCompatActivity(), HasAndroidInjector {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         lifecycle.addObserver(pickleContentObserver)
 
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            if (isGranted) {
-                setupViewModel()
-                setupSystemUI()
-                pickleContentObserver.getContentChangedEvent().observe(this) {
+        if (DeviceUtil.hasPermission(this)) {
+            init()
+        } else {
+            registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+                if (isGranted) {
+                    init()
                     sharedViewModel.repository.invalidate()
+                } else {
+                    finish()
                 }
-                navHostFragment.navController.addOnDestinationChangedListener { controller, destination, arguments ->
-                    invalidateOptionsMenu()
-                }
-                sharedViewModel.selection.getCount().observe(this) { invalidateOptionsMenu() }
-            } else {
-                finish()
-            }
-        }.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+            }.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
 
         systemUIEvent.observe(this) {
             when (it) {
@@ -98,6 +93,21 @@ class PickleActivity : AppCompatActivity(), HasAndroidInjector {
             }
         }
 
+    }
+
+    override fun onPostCreate(savedInstanceState: Bundle?) {
+        super.onPostCreate(savedInstanceState)
+        navHostFragment.navController.addOnDestinationChangedListener { controller, destination, arguments ->
+            invalidateOptionsMenu()
+        }
+    }
+
+    private fun init() {
+        setupViewModel()
+        pickleContentObserver.getContentChangedEvent().observe(this) {
+            sharedViewModel.repository.invalidate()
+        }
+        sharedViewModel.selection.getCount().observe(this) { invalidateOptionsMenu() }
     }
 
     private fun disableFullscreen() {
@@ -114,7 +124,7 @@ class PickleActivity : AppCompatActivity(), HasAndroidInjector {
     }
 
     private fun enableFullscreen() {
-        if(DeviceUtil.isAndroid5Later()){
+        if (DeviceUtil.isAndroid5Later()) {
             val colorRes = R.color.black_a50
             val systemUIBackgroundColor = ContextCompat.getColor(this, colorRes)
             window.statusBarColor = systemUIBackgroundColor
@@ -131,7 +141,7 @@ class PickleActivity : AppCompatActivity(), HasAndroidInjector {
     }
 
     private fun hideSystemUI() {
-        if(DeviceUtil.isAndroid5Later()){
+        if (DeviceUtil.isAndroid5Later()) {
             window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_IMMERSIVE
                     or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                     or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
@@ -146,33 +156,6 @@ class PickleActivity : AppCompatActivity(), HasAndroidInjector {
         this.sharedViewModel = sharedViewModelProvider.get(PickleSharedViewModel::class.java)
         lifecycle.addObserver(sharedViewModel)
     }
-
-    private fun setupSystemUI() {
-        Timber.d("setupStatusBar")
-//        sharedViewModel.currentDestinationId.observe(this) { destinationId ->
-//            when (navHostFragment.navController.currentDestination?.id) {
-//                R.id.pickleDetailFragment -> {
-//                    systemUIController.updateUI(true)
-//                }
-//                else -> {
-//                    systemUIController.updateUI(false)
-//
-//                }
-//            }
-//        }
-    }
-
-//    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
-//        when (navHostFragment.navController.currentDestination?.id) {
-//            R.id.pickleFragment, R.id.pickleDetailFragment -> {
-//                doneMenuItem =
-//                    menu?.add(MENU_GROUP_ID, MENU_ITEM_DONE_ID, MENU_ITEM_DONE_ID, R.string.done)
-//                doneMenuItem?.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM)
-//                doneMenuItem?.isEnabled = !sharedViewModel.selection.isEmpty()
-//            }
-//        }
-//        return super.onPrepareOptionsMenu(menu)
-//    }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {

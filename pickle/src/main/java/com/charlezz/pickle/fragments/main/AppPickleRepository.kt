@@ -1,6 +1,8 @@
 package com.charlezz.pickle.fragments.main
 
 import android.content.Context
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -8,9 +10,7 @@ import com.charlezz.pickle.data.entity.Media
 import com.charlezz.pickle.util.PickleConstants
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
 import timber.log.Timber
 
 
@@ -20,8 +20,7 @@ class AppPickleRepository constructor(
 
     private var currentPagingSource: PicklePagingSource? = null
 
-    @ExperimentalCoroutinesApi
-    private val countChannel = ConflatedBroadcastChannel<Int?>()
+    private val count = MutableLiveData<Int>()
 
     init {
         Timber.d("AppPickleRepository")
@@ -41,24 +40,22 @@ class AppPickleRepository constructor(
             ),
             initialKey = startPosition,
         ) {
-
             PicklePagingSource(
                 context = context,
                 bucketId = bucketId,
                 selectionType = selectionType,
-                countChannel = countChannel
+                count = count
             ).also {
                 currentPagingSource = it
             }
         }.flow
     }
-
     override fun invalidate(){
         currentPagingSource?.invalidate()
     }
 
     @ExperimentalCoroutinesApi
     @FlowPreview
-    override fun getCount(): Flow<Int?> = countChannel.asFlow()
+    override fun getCount(): LiveData<Int> = count
 
 }
