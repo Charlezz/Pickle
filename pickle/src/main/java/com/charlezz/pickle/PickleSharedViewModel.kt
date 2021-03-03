@@ -73,7 +73,7 @@ class PickleSharedViewModel @AssistedInject constructor(
         }
         .cachedIn(viewModelScope)
 
-    val itemCount = repository.getCount().asLiveData()
+    val itemCount = repository.getCount()
 
     val currentFolder = savedStateHandle.getLiveData<Album>(KEY_FOLDER)
 
@@ -136,6 +136,10 @@ class PickleSharedViewModel @AssistedInject constructor(
     fun setBucketId(album: Album?) {
         savedStateHandle.set(KEY_FOLDER, album)
     }
+
+//    fun refresh(){
+//        setBucketId(savedStateHandle.get<Album>(KEY_FOLDER))
+//    }
 
     @AssistedInject.Factory
     interface Factory : AssistedSavedStateViewModelFactory<PickleSharedViewModel>

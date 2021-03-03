@@ -93,9 +93,10 @@ class PickleFragment : DaggerFragment(),
         registerForActivityResult(TakePictureContract()) { activityResult: Boolean ->
             if (activityResult) {
                 Timber.d("take picture result")
-                sharedViewModel.cameraUtil.saveImageToMediaStore {
+                val callback = {
                     sharedViewModel.repository.invalidate()
                 }
+                sharedViewModel.cameraUtil.saveImageToMediaStore(callback)
             }
         }
 
@@ -207,10 +208,6 @@ class PickleFragment : DaggerFragment(),
                     findNavController().navigate(navDirection)
                 }
             }
-        }
-
-        sharedViewModel.itemCount.observe(viewLifecycleOwner) { totalCount ->
-
         }
 
         sharedViewModel.selection.getCount().observe(viewLifecycleOwner) { count ->

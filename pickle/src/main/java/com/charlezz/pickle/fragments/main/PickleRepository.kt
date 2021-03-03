@@ -1,5 +1,6 @@
 package com.charlezz.pickle.fragments.main
 
+import androidx.lifecycle.LiveData
 import androidx.paging.PagingData
 import com.charlezz.pickle.data.entity.Media
 import kotlinx.coroutines.flow.Flow
@@ -15,5 +16,5 @@ interface PickleRepository {
 
     fun invalidate()
 
-    fun getCount():Flow<Int?>
+    fun getCount(): LiveData<Int>
 }
