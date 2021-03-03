@@ -7,13 +7,13 @@ import android.provider.MediaStore
 import androidx.core.database.getIntOrNull
 import androidx.core.database.getLongOrNull
 import androidx.core.database.getStringOrNull
+import androidx.lifecycle.MutableLiveData
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.charlezz.pickle.data.entity.Media
 import com.charlezz.pickle.util.DeviceUtil
 import com.charlezz.pickle.util.PickleConstants
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import timber.log.Timber
 import kotlin.math.max
 
@@ -23,7 +23,7 @@ class PicklePagingSource(
     context: Context,
     bucketId: Long? = null,
     selectionType: SelectionType,
-    countChannel: ConflatedBroadcastChannel<Int?>
+    count: MutableLiveData<Int>
 ) : PagingSource<Int, Media>() {
 
 
@@ -101,7 +101,7 @@ class PicklePagingSource(
             selectionArgs.toTypedArray(),
             sortOrder
         )
-        countChannel.offer(cursor?.count)
+        count.postValue(cursor?.count ?: 0)
         Timber.d("Cursor.count = ${cursor?.count}")
 
     }
