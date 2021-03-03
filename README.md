@@ -1,5 +1,4 @@
 # Pickle - The fastest image picker for Android
-## 🚧🚧Work in Progress🚧🚧
 [ ![Download](https://api.bintray.com/packages/charlezz/Pickle/com.charlezz.pickle/images/download.svg) ](https://bintray.com/charlezz/Pickle/com.charlezz.pickle/)
 
 <p>
@@ -7,8 +6,19 @@
 <br>
 Designed based on Paging3.
 ## Installation
-
 ### 1. Add dependency
+
+First of all, add the repository to project's level `build.gradle`
+
+```groovy
+allprojects {
+    repositories {
+        google()
+        jcenter()
+        maven { url "https://jitpack.io" }
+    }
+}
+```
 
  Add this line to `build.gradle` for your application module
 
@@ -73,7 +83,14 @@ singleLauncher.launch(SingleConfig.default)
 
 ## For Java User
 
-Tbd
+It's similar to what Kotlin does.
+
+```java
+ActivityResultLauncher<Config> launcher = registerForActivityResult(
+    new PickleActivityContract(), 
+    result -> {...}
+);
+```
 
 ## License
 
