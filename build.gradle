@@ -4,7 +4,7 @@ buildscript {
     ext.targetSdk = 30
     ext.minSdk = 16
     ext.buildTools = "30.0.2"
-    ext.kotlin_version = '1.4.21'
+    ext.kotlin_version = '1.4.31'
     ext.navigation_version = '2.3.3'
     repositories {
         google()
