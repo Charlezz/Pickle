@@ -9,6 +9,7 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
+import com.bumptech.glide.signature.MediaStoreSignature
 import com.charlezz.pickle.OnImageAppearedListener
 import com.charlezz.pickle.R
 import com.charlezz.pickle.Selection
@@ -41,6 +42,7 @@ class PickleDetailAdapter @Inject constructor(
             holder.binding.position = position
             Glide.with(holder.binding.image)
                 .load(item.getUri())
+                .signature(MediaStoreSignature(item.media.mimeType, item.media.dateModified, item.media.orientation))
                 .listener(object:RequestListener<Drawable>{
                     override fun onLoadFailed(
                         e: GlideException?,

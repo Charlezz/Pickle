@@ -13,12 +13,12 @@ data class Media constructor(
     val relativePath: String?,
     val mediaType: Int,
     val mimeType: String,
-    val dateModified: Long?,
+    val dateModified: Long,
     val dateTaken: Long?,
     val dateAdded: Long?,
     val width: Int?,
     val height: Int?,
-    val orientation: Int?,
+    val orientation: Int,
     val size: Int,
     val duration: Long?
 ) : Parcelable{
