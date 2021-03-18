@@ -22,6 +22,6 @@ open class Config internal constructor(
     ) : Parcelable{
     companion object{
         @JvmStatic
-        val default = Config(false)
+        fun getDefault() = Config(false)
     }
 }

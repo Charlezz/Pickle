@@ -57,8 +57,6 @@ class PickleSharedViewModel @AssistedInject constructor(
 
     val itemClickEvent = SingleLiveEvent<Triple<View, Media, Int>?>()
 
-    val singleImageEvent = SingleLiveEvent<Triple<View, Media, Int>?>()
-
     val items: Flow<PagingData<MediaItem>> = savedStateHandle.getLiveData<Album>(KEY_FOLDER)
         .asFlow()
         .flatMapLatest { album: Album? ->
@@ -88,12 +86,7 @@ class PickleSharedViewModel @AssistedInject constructor(
 
     override fun onItemClick(view: View, item: MediaItem, position: Int) {
         val triple = Triple(view, item.media, position)
-
-        if (config.singleMode) {
-            singleImageEvent.value = triple
-        } else {
-            itemClickEvent.value = triple
-        }
+        itemClickEvent.value = triple
 
     }
 
