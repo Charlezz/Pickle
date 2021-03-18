@@ -48,7 +48,7 @@ abstract class PickleModule {
         @Provides
         @PickleScope
         fun provideConfig(activity:PickleActivity): Config {
-            return activity.intent.getParcelableExtra(PickleConstants.KEY_CONFIG)?:Config.default
+            return activity.intent.getParcelableExtra(PickleConstants.KEY_CONFIG)?:Config.getDefault()
         }
 
         @Provides

@@ -12,7 +12,7 @@ class Selection(private val selectedItems: LinkedHashMap<Long, Media> = LinkedHa
 
     private val count = MutableLiveData(selectedItems.size)
 
-    private fun select(id: Long, item: Media) {
+    fun select(id: Long, item: Media) {
         selectedItems[id] = item
         count.value = selectedItems.size
     }

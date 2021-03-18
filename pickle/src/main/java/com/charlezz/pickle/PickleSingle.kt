@@ -13,7 +13,7 @@ import androidx.fragment.app.Fragment
 import com.charlezz.pickle.data.entity.Media
 import com.charlezz.pickle.util.PickleActivityContract
 
-class Pickle private constructor() {
+class PickleSingle private constructor() {
     private lateinit var launcher: ActivityResultLauncher<Config>
     private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
     private lateinit var config: Config
@@ -24,9 +24,11 @@ class Pickle private constructor() {
             fragment: Fragment,
             callback: Callback,
             fallback: Fallback
-        ): Pickle {
-            val pickle = Pickle()
-            pickle.launcher = fragment.registerForActivityResult(PickleActivityContract()){ result-> callback.onResult(result) }
+        ): PickleSingle {
+            val pickle = PickleSingle()
+            pickle.launcher = fragment.registerForActivityResult(PickleActivityContract()){ result->
+                callback.onResult(result?.firstOrNull())
+            }
             pickle.requestPermissionLauncher =
                 fragment.registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
                     if (granted) {
@@ -42,11 +44,12 @@ class Pickle private constructor() {
         fun register(
             fragment: Fragment,
             callback: Callback
-        ): Pickle {
+        ): PickleSingle {
             return register(fragment, callback, object:Fallback{
                 override fun onFailed() {
                     showSystemSettingDialog(fragment.requireActivity())
                 }
+
             })
         }
 
@@ -55,9 +58,11 @@ class Pickle private constructor() {
             activity: ComponentActivity,
             callback: Callback,
             fallback: Fallback
-        ): Pickle {
-            val pickle = Pickle()
-            pickle.launcher = activity.registerForActivityResult(PickleActivityContract()){result->callback.onResult(result)}
+        ): PickleSingle {
+            val pickle = PickleSingle()
+            pickle.launcher = activity.registerForActivityResult(PickleActivityContract()){ result->
+                callback.onResult(result?.firstOrNull())
+            }
             pickle.requestPermissionLauncher =
                 activity.registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted: Boolean ->
                     if (granted) {
@@ -72,8 +77,8 @@ class Pickle private constructor() {
         @JvmStatic
         fun register(
             activity: ComponentActivity,
-            callback: Callback,
-        ): Pickle {
+            callback: Callback
+        ): PickleSingle {
             return register(activity, callback, object:Fallback{
                 override fun onFailed() {
                     showSystemSettingDialog(activity)
@@ -86,7 +91,7 @@ class Pickle private constructor() {
                 .setMessage(R.string.pickle_dialog_permission_message)
                 .setPositiveButton(
                     R.string.pickle_dialog_permission_settings
-                ) { _, _ ->
+                ) { dialog, which ->
                     val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                     val uri: Uri = Uri.fromParts("package", activity.packageName, null)
                     intent.data = uri
@@ -95,6 +100,7 @@ class Pickle private constructor() {
                 .setNegativeButton(R.string.pickle_cancel, null)
                 .show()
         }
+
     }
 
     private fun internalLaunch() {
@@ -103,11 +109,12 @@ class Pickle private constructor() {
 
     fun launch(config: Config) {
         this.config = config
+        this.config.singleMode = true
         requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
     }
 
     interface Callback {
-        fun onResult(result:ArrayList<Media>)
+        fun onResult(media:Media?)
     }
 
     interface Fallback{

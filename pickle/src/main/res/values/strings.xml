@@ -11,4 +11,7 @@
     <string name="pickle_desc_check_box">CheckBox</string>
     <string name="pickle_desc_camera">Camera</string>
     <string name="pickle_desc_thumbnail">Thumbnail</string>
+
+    <string name="pickle_dialog_permission_message">Unable to load media. Tap SETTINGS, go to App info > Permissions, then allow the following permissions and try again : [Storage]</string>
+    <string name="pickle_dialog_permission_settings">Settings</string>
 </resources>

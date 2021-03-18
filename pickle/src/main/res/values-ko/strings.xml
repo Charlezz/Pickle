@@ -11,4 +11,8 @@
     <string name="pickle_desc_check_box">체크박스</string>
     <string name="pickle_desc_camera">카메라</string>
     <string name="pickle_desc_thumbnail">썸네일</string>
+
+    <string name="pickle_dialog_permission_message">[애플리케이션 정보 > 권한]에서 [저장소] 권한을 허용하고 다시 해보세요.</string>
+    <string name="pickle_dialog_permission_settings">상세 설정</string>
+
 </resources>

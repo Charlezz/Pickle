@@ -184,11 +184,19 @@ class PickleFragment : DaggerFragment(),
         adapters.itemAdapter.selection = sharedViewModel.selection
 
         sharedViewModel.itemClickEvent.observe(viewLifecycleOwner) { triple ->
+
             triple?.let {
                 val view = it.first
                 val media = it.second
                 val position = it.third
                 sharedViewModel.bindingItemAdapterPosition.set(position)
+
+                // Skip navigating if singleMode
+                if(config.singleMode){
+                    sharedViewModel.selection.select(media.id, media)
+                    optionMenuViewModel.clickEvent.call()
+                    return@let
+                }
 
                 val navDirection =
                     PickleFragmentDirections.actionPickleFragmentToPickleDetailFragment(
@@ -224,14 +232,6 @@ class PickleFragment : DaggerFragment(),
             } else {
                 binding.recyclerView.adapter = adapters.itemAdapter
             }
-        }
-
-        sharedViewModel.singleImageEvent.observe(viewLifecycleOwner) { triple ->
-            requireActivity().setResult(Activity.RESULT_OK, Intent().apply {
-                val media = triple?.second
-                putExtra(PickleConstants.KEY_RESULT_SINGLE, media)
-            })
-            requireActivity().finish()
         }
 
         optionMenuViewModel.clickEvent.observe(viewLifecycleOwner) {
