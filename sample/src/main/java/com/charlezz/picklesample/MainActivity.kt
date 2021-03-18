@@ -7,11 +7,11 @@ import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.charlezz.pickle.Config
-import com.charlezz.pickle.SingleConfig
+import com.charlezz.pickle.Pickle
+import com.charlezz.pickle.PickleSingle
 import com.charlezz.pickle.data.entity.Media
-import com.charlezz.pickle.getPickle
-import com.charlezz.pickle.getPickleForSingle
 import com.charlezz.picklesample.databinding.ActivityMainBinding
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -19,16 +19,17 @@ class MainActivity : AppCompatActivity() {
 
     private val adapter = MainAdapter()
 
-    private val singleLauncher = getPickleForSingle { media: Media? ->
-        media?.let { adapter.setImages(listOf(media)) }
-    }
-
-    private val launcher = getPickle { mediaList:List<Media>? ->
-        mediaList?.let {
-            adapter.setImages(it)
+    private val singleLauncher = PickleSingle.register(this, object:PickleSingle.Callback{
+        override fun onResult(media: Media?) {
+            media?.let { adapter.setImages(listOf(media)) }
         }
+    })
 
-    }
+    private val launcher = Pickle.register(this, object:Pickle.Callback{
+        override fun onResult(result: ArrayList<Media>) {
+            adapter.setImages(result)
+        }
+    })
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,17 +39,17 @@ class MainActivity : AppCompatActivity() {
         binding.recyclerView.adapter = adapter
 
         binding.singleBtn.setOnClickListener {
-            singleLauncher.launch(SingleConfig.default)
+            singleLauncher.launch(Config.getDefault())
         }
 
         binding.btn.setOnClickListener {
-            launcher.launch(Config.default.apply {
+            launcher.launch(Config.getDefault().apply {
                 this.debugMode = false
             })
         }
 
         if (savedInstanceState == null) {
-            singleLauncher.launch(SingleConfig.default)
+//            singleLauncher.launch(Config.default)
         }
 
         adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
@@ -58,7 +59,6 @@ class MainActivity : AppCompatActivity() {
                     if (adapter.itemCount == 0) View.VISIBLE else View.GONE
             }
         })
-
 
 
     }

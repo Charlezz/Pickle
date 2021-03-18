@@ -22,7 +22,7 @@ allprojects {
 
  Add this line to `build.gradle` for your application module
 
-```bash
+```groovy
 dependencies{
     implementation 'com.charlezz:pickle:latest_version'
 }
@@ -31,7 +31,7 @@ dependencies{
 
  Add this line to `build.gradle` for your application module
 
-```
+```groovy
 android{
     buildFeatures.dataBinding = true
 }
@@ -47,38 +47,42 @@ For the reason why Pickle uses dataBinding library, you may want to set dataBind
 
 The launcher MUST be initialized before Lifecycle.State.STARTED
 
-```bash
-val launcher:ActivityResultLauncher<Config> = getPickle { mediaList:List<Media> ->
-    // handle the result
-}
+```kotlin
+private val launcher = Pickle.register(this, object:Pickle.Callback{
+    override fun onResult(result: ArrayList<Media>) {
+        adapter.setImages(result)
+    }
+})
 ```
 ### 2. Configure your Config if you want and call launch() function
 
-```bash
-launcher.launch(Config.default)
+```kotlin
+launcher.launch(Config.getDefault())
 ```
 
 ## Configuration
 
 Customize a config if you want
 
-```
-val config = Config.default.apply {  
+```kotlin
+val config = Config.getDefault().apply {  
     //add whatever you want below
     debugMode = false // this flag disables printing log from Timber
 }
 ```
 
-You may want to use SingleConfig when user can pick only one Image or Video.
+You may want to use PickleSingle when user can pick only an Image or a Video.
 
-```
+```kotlin
 // init
-private val singleLauncher = getPickleForSingle { media: Media? ->
-    // do something with a media
-}
+private val singleLauncher = PickleSingle.register(this, object:PickleSingle.Callback{
+    override fun onResult(media: Media?) {
+        // do something with a media
+    }
+})
 ...
 // Launch Pickle with SingleConfig
-singleLauncher.launch(SingleConfig.default)
+singleLauncher.launch(Config.getDefault())
 ```
 
 ## For Java User
@@ -86,24 +90,27 @@ singleLauncher.launch(SingleConfig.default)
 It's similar to what Kotlin does.
 
 ```java
-ActivityResultLauncher<Config> launcher = registerForActivityResult(
-    new PickleActivityContract(), 
-    result -> {...}
-);
+private Pickle pickle = Pickle.register(this, result -> {
+    // ...
+});
+
+pickle.launch(Config.getDefault())
 ```
 
 ## License
 
-    Copyright 2021 Charlezz
-    
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-    
-       http://www.apache.org/licenses/LICENSE-2.0
-    
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
+```text
+Copyright 2021 Charlezz
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
